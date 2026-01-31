@@ -1,0 +1,571 @@
+.print-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Panel Headers */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 8px 8px 0 0;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.refresh-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  transition: background-color 0.2s;
+}
+
+.refresh-btn:hover {
+  background: #e9ecef;
+}
+
+/* Printer Status Panel */
+.printer-status-panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.printer-info {
+  padding: 1.5rem;
+}
+
+.printer-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.printer-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.printer-name h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.default-badge {
+  background: #28a745;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.printer-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.printer-status .status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.printer-status.printer-online {
+  background: #d4edda;
+  color: #155724;
+}
+
+.printer-status.printer-online .status-indicator {
+  background: #28a745;
+}
+
+.printer-status.printer-offline {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.printer-status.printer-offline .status-indicator {
+  background: #dc3545;
+}
+
+.printer-status.printer-busy {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.printer-status.printer-busy .status-indicator {
+  background: #ffc107;
+  animation: pulse 1.5s infinite;
+}
+
+.printer-status.printer-error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.printer-status.printer-error .status-indicator {
+  background: #dc3545;
+}
+
+.printer-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-item label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-item span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.no-printer {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.no-printer-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-printer p {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.detect-printer-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.detect-printer-btn:hover {
+  background: #0056b3;
+}
+
+/* Print Jobs Panel */
+.print-jobs-panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.job-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.job-stats .stat {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.jobs-container {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.no-jobs {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.no-jobs-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.no-jobs h3 {
+  margin: 0 0 0.5rem 0;
+  color: #495057;
+}
+
+.no-jobs p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Job Items */
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.job-item {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.job-item:hover {
+  background: #f8f9fa;
+}
+
+.job-item:last-child {
+  border-bottom: none;
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem 0.5rem;
+}
+
+.job-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.job-id {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  color: #495057;
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.job-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.job-status .status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.job-status.status-queued {
+  background: #cce7ff;
+  color: #004085;
+}
+
+.job-status.status-queued .status-indicator {
+  background: #007bff;
+}
+
+.job-status.status-printing {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.job-status.status-printing .status-indicator {
+  background: #ffc107;
+  animation: pulse 1.5s infinite;
+}
+
+.job-status.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.job-status.status-completed .status-indicator {
+  background: #28a745;
+}
+
+.job-status.status-failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.job-status.status-failed .status-indicator {
+  background: #dc3545;
+}
+
+.job-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.execute-btn,
+.retry-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.execute-btn {
+  background: #28a745;
+  color: white;
+}
+
+.execute-btn:hover {
+  background: #1e7e34;
+}
+
+.retry-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.retry-btn:hover {
+  background: #545b62;
+}
+
+/* Job Details */
+.job-details {
+  padding: 0 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.job-meta {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-item label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-item span {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.job-files label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.files-preview {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.file-preview,
+.more-files {
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #495057;
+  border: 1px solid #e9ecef;
+}
+
+.more-files {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.job-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.option-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.options-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.option {
+  background: #e9ecef;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+.pricing-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.pricing-details {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.total-price {
+  font-size: 1.1rem;
+  color: #28a745;
+  font-weight: 600;
+}
+
+/* Job Progress */
+.job-progress {
+  padding: 0 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #ffc107;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: #856404;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .print-queue {
+    padding: 0.5rem;
+  }
+  
+  .panel-header {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .job-stats {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .job-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .job-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .job-meta {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .job-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .pricing-info {
+    align-items: flex-start;
+  }
+  
+  .printer-main-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .printer-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

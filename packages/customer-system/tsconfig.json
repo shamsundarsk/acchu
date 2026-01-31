@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/client",
+    "noEmit": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/client/**/*",
+    "../shared-types/src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

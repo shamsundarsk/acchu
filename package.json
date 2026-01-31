@@ -1,0 +1,29 @@
+{
+  "name": "secureprint-session",
+  "version": "1.0.0",
+  "description": "SecurePrint Session - Secure ephemeral printing system",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:local-agent\" \"npm run dev:customer-system\"",
+    "dev:local-agent": "npm run dev --workspace=@sps/local-agent",
+    "dev:customer-system": "npm run dev --workspace=@sps/customer-system",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "eslint packages/*/src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit --workspaces"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.45.0",
+    "typescript": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

@@ -1,0 +1,264 @@
+/* SessionPage.css - Mobile-Optimized Styles */
+
+/* Override any conflicting styles from the main mobile design */
+.mobile-app .upload-section,
+.mobile-app .print-config-section,
+.mobile-app .payment-section,
+.mobile-app .printing-section,
+.mobile-app .completion-section {
+  display: block;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* File Upload Component Integration */
+.upload-step .file-upload-container {
+  display: none; /* Hide the original file upload UI since we're using our custom design */
+}
+
+/* Print Options Integration */
+.config-step .print-options-container {
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.config-step .options-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.config-step .option-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.config-step .option-group:last-child {
+  border-bottom: none;
+}
+
+.config-step .option-group label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a1a;
+  min-width: auto;
+}
+
+.config-step .option-group select,
+.config-step .option-group input {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 16px;
+  background: white;
+  min-width: 120px;
+}
+
+/* Payment Interface Integration */
+.config-step .payment-interface {
+  margin-top: 20px;
+}
+
+.config-step .pay-button {
+  width: 100%;
+  padding: 16px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+}
+
+.config-step .pay-button:hover:not(:disabled) {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.config-step .pay-button:disabled {
+  background: #999;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error States */
+.error-banner {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 16px 20px;
+  margin: 0 20px 20px;
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-banner p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.close-error {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #991b1b;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.close-error:hover {
+  background-color: rgba(153, 27, 27, 0.1);
+}
+
+/* Progress Animations */
+.upload-step,
+.config-step,
+.print-step {
+  animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading States */
+.loading-state .loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-state .loading-content::before {
+  content: '';
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e0e0e0;
+  border-top: 3px solid #1a1a1a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* File Upload Progress */
+.file-item.uploading {
+  opacity: 0.7;
+}
+
+.file-item.uploading .file-meta {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.file-item.uploading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: #1a1a1a;
+  animation: uploadProgress 2s ease-in-out;
+}
+
+@keyframes uploadProgress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Print Job Success Animation */
+.print-step.completed .qr-frame {
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 375px) {
+  .step-title {
+    font-size: 28px;
+  }
+  
+  .qr-frame {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .action-btn {
+    flex-direction: row;
+    justify-content: center;
+    padding: 12px 20px;
+  }
+}
+
+/* Dark mode support (if needed later) */
+@media (prefers-color-scheme: dark) {
+  .mobile-app {
+    background: #1a1a1a;
+    color: #f5f5f5;
+  }
+  
+  .mobile-header {
+    background: #1a1a1a;
+    border-bottom-color: #333;
+  }
+  
+  .step-progress {
+    background: #2a2a2a;
+    border-bottom-color: #333;
+  }
+  
+  .mobile-main {
+    background: #2a2a2a;
+  }
+  
+  .mobile-footer {
+    background: #1a1a1a;
+    border-top-color: #333;
+  }
+}

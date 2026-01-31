@@ -1,0 +1,59 @@
+{
+  "name": "@sps/local-agent",
+  "version": "1.0.0",
+  "description": "ACCHU Local Agent - Desktop application for shop PCs",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run build:watch\" \"npm run electron:dev\"",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:renderer": "vite build",
+    "electron:dev": "wait-on dist/main.js && electron .",
+    "electron:pack": "electron-builder",
+    "clean": "rm -rf dist build",
+    "test": "vitest --run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@sps/shared-types": "*",
+    "electron-store": "^8.1.0",
+    "image-size": "^2.0.2",
+    "node-gyp-build": "^4.8.4",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.3",
+    "uuid": "^9.0.0",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/image-size": "^0.7.0",
+    "@types/node": "^20.4.5",
+    "@types/qrcode": "^1.5.2",
+    "@types/uuid": "^9.0.2",
+    "@types/ws": "^8.5.5",
+    "@vitejs/plugin-react": "^4.0.3",
+    "electron": "^25.3.1",
+    "electron-builder": "^24.6.3",
+    "fast-check": "^4.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.7",
+    "vitest": "^0.34.1",
+    "wait-on": "^7.0.1"
+  },
+  "build": {
+    "appId": "com.acchu.local-agent",
+    "productName": "ACCHU Local Agent",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    }
+  }
+}

@@ -1,0 +1,321 @@
+.error-display {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.error-notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 400px;
+}
+
+.error-notification {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid;
+  overflow: hidden;
+  pointer-events: auto;
+  animation: slideInRight 0.3s ease-out;
+  position: relative;
+}
+
+.error-notification.error-critical {
+  border-left-color: #dc3545;
+  background: linear-gradient(135deg, #fff 0%, #ffebee 100%);
+}
+
+.error-notification.error-high {
+  border-left-color: #fd7e14;
+  background: linear-gradient(135deg, #fff 0%, #fff3e0 100%);
+}
+
+.error-notification.error-medium {
+  border-left-color: #ffc107;
+  background: linear-gradient(135deg, #fff 0%, #fff8e1 100%);
+}
+
+.error-notification.error-low {
+  border-left-color: #17a2b8;
+  background: linear-gradient(135deg, #fff 0%, #e8f4f8 100%);
+}
+
+.error-content {
+  padding: 1rem;
+}
+
+.error-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.error-icon-wrapper {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.error-notification.error-critical .error-icon-wrapper {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.error-notification.error-high .error-icon-wrapper {
+  background: rgba(253, 126, 20, 0.1);
+}
+
+.error-notification.error-medium .error-icon-wrapper {
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.error-notification.error-low .error-icon-wrapper {
+  background: rgba(23, 162, 184, 0.1);
+}
+
+.error-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.error-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.error-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.error-severity {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.error-notification.error-critical .error-severity {
+  background: #dc3545;
+  color: white;
+}
+
+.error-notification.error-high .error-severity {
+  background: #fd7e14;
+  color: white;
+}
+
+.error-notification.error-medium .error-severity {
+  background: #ffc107;
+  color: #212529;
+}
+
+.error-notification.error-low .error-severity {
+  background: #17a2b8;
+  color: white;
+}
+
+.error-message {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+}
+
+.error-timestamp {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.error-actions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.dismiss-error-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.dismiss-error-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+  transform: scale(1.1);
+}
+
+/* Auto-dismiss progress bar */
+.auto-dismiss-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffc107, #fd7e14);
+  width: 100%;
+  animation: progressCountdown 10s linear forwards;
+}
+
+/* Error summary notification */
+.error-summary-notification {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  pointer-events: auto;
+  animation: slideInRight 0.3s ease-out 0.2s both;
+}
+
+.summary-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.summary-icon {
+  font-size: 1rem;
+}
+
+.summary-text {
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes progressCountdown {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* Critical error shake animation */
+.error-notification.error-critical {
+  animation: slideInRight 0.3s ease-out, shake 0.5s ease-in-out 0.3s;
+}
+
+/* Hover effects */
+.error-notification:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .error-display {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+  
+  .error-notifications {
+    max-width: none;
+  }
+  
+  .error-notification {
+    margin: 0;
+  }
+  
+  .error-content {
+    padding: 0.75rem;
+  }
+  
+  .error-message {
+    font-size: 0.85rem;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .error-notification {
+    background: #2c3e50;
+    color: #ecf0f1;
+  }
+  
+  .error-notification.error-critical {
+    background: linear-gradient(135deg, #2c3e50 0%, #3a2a2a 100%);
+  }
+  
+  .error-notification.error-high {
+    background: linear-gradient(135deg, #2c3e50 0%, #3a2f2a 100%);
+  }
+  
+  .error-notification.error-medium {
+    background: linear-gradient(135deg, #2c3e50 0%, #3a3a2a 100%);
+  }
+  
+  .error-notification.error-low {
+    background: linear-gradient(135deg, #2c3e50 0%, #2a3a3a 100%);
+  }
+  
+  .error-message {
+    color: #ecf0f1;
+  }
+  
+  .error-timestamp {
+    color: #95a5a6;
+  }
+  
+  .error-summary-notification {
+    background: #34495e;
+    border-color: #4a5f7a;
+    color: #ecf0f1;
+  }
+}

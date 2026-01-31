@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/server",
+    "rootDir": "./src/server",
+    "noEmit": false,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@sps/shared-types": ["../../shared-types/src"],
+      "@sps/shared-types/*": ["../../shared-types/src/*"]
+    }
+  },
+  "include": [
+    "src/server/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/server/**/*.test.ts"
+  ]
+}
