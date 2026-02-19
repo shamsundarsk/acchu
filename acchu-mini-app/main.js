@@ -14,8 +14,8 @@ let printQueue = [];
 let printerService = null;
 
 // Configuration
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
-const WS_URL = BACKEND_URL.replace('http', 'ws') + '/ws';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://acchu-six.vercel.app';
+const WS_URL = BACKEND_URL.replace('http', 'ws').replace('https', 'wss') + '/ws';
 
 // Create temp directory for downloaded files
 const TEMP_DIR = path.join(os.tmpdir(), 'acchu-print-shop');
@@ -235,22 +235,8 @@ ipcMain.handle('get-connection-status', async () => {
 
 ipcMain.handle('generate-qr-code', async () => {
     try {
-        // Get local IP address
-        const networkInterfaces = os.networkInterfaces();
-        let localIP = 'localhost';
-        
-        for (const interfaceName in networkInterfaces) {
-            const interfaces = networkInterfaces[interfaceName];
-            for (const iface of interfaces) {
-                if (iface.family === 'IPv4' && !iface.internal) {
-                    localIP = iface.address;
-                    break;
-                }
-            }
-        }
-        
-        // Generate customer URL
-        const customerUrl = `http://${localIP}:3003`;
+        // Use deployed URL
+        const customerUrl = process.env.FRONTEND_URL || 'https://acchu-six.vercel.app';
         
         // Generate QR code as data URL
         const qrCodeDataUrl = await QRCode.toDataURL(customerUrl, {
@@ -265,8 +251,7 @@ ipcMain.handle('generate-qr-code', async () => {
         return {
             success: true,
             qrCode: qrCodeDataUrl,
-            url: customerUrl,
-            ip: localIP
+            url: customerUrl
         };
     } catch (error) {
         console.error('QR code generation failed:', error);
