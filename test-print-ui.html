@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print UI Test - ACCHU</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f0;
+            min-height: 100vh;
+        }
+
+        .mobile-app {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: white;
+            border-bottom: 1px solid #e8e8e0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 0.02em;
+        }
+
+        .notification-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 40px;
+            background: #f5f5f0;
+            border-bottom: 1px solid #e8e8e0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .step.active,
+        .step.completed {
+            opacity: 1;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background: #22c55e;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            letter-spacing: 0.05em;
+        }
+
+        .step.active .step-label,
+        .step.completed .step-label {
+            color: #1a1a1a;
+        }
+
+        .mobile-main {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Print Step Styles */
+        .print-step {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: calc(100vh - 200px);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .step-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .step-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0 0 30px 0;
+            line-height: 1.4;
+        }
+
+        .print-status-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .document-preview {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .doc-icon {
+            font-size: 48px;
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .doc-info {
+            flex: 1;
+        }
+
+        .doc-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .doc-count {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .print-progress-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-pending,
+        .status-printing,
+        .status-completed,
+        .status-failed {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+
+            align-itemfailed .status-icon {
+                background: rgba(244, 67, 54, 0.2);
+                color: #f44336;
+            }
+
+            .printing-spinner {
+                width: 24px;
+                height: 24px;
+                border: 3px solid rgba(33, 150, 243, 0.3);
+                border-top: 3px solid #2196f3;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            .status-text {
+                flex: 1;
+            }
+
+            .status-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: white;
+                margin-bottom: 4px;
+            }
+
+            .status-desc {
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            .scan-to-pay-section {
+                margin: 40px 0;
+                text-align: center;
+            }
+
+            .scan-icon-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                width: 72px;
+                height: 72px;
+                margin: 0 auto 20px;
+            }
+
+            .scan-dot {
+                width: 20px;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 4px;
+            }
+
+            .scan-to-pay-text {
+                font-size: 20px;
+                font-weight: 600;
+                color: white;
+                margin-bottom: 12px;
+                letter-spacing: 0.02em;
+            }
+
+            .scan-subtitle {
+                font-size: 16px;
+                color: rgba(255, 255, 255, 0.8);
+                line-height: 1.4;
+            }
+
+            .start-print-btn,
+            .retry-print-btn,
+            .collect-btn {
+                width: 100%;
+                padding: 16px;
+                border: none;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                margin: 20px 0;
+                letter-spacing: 0.02em;
+            }
+
+            .start-print-btn {
+                background: rgba(76, 175, 80, 0.9);
+                color: white;
+            }
+
+            .start-print-btn:hover {
+                background: rgba(76, 175, 80, 1);
+                transform: translateY(-1px);
+            }
+
+            .retry-print-btn {
+                background: rgba(255, 152, 0, 0.9);
+                color: white;
+            }
+
+            .retry-print-btn:hover {
+                background: rgba(255, 152, 0, 1);
+                transform: translateY(-1px);
+            }
+
+            .collect-btn {
+                background: rgba(255, 255, 255, 0.2);
+                color: rgba(255, 255, 255, 0.7);
+                cursor: not-allowed;
+            }
+
+            .collect-btn:disabled {
+                transform: none;
+            }
+
+            .print-icon,
+            .retry-icon,
+            .collect-icon {
+                font-size: 20px;
+            }
+
+            .mobile-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px 20px;
+                background: #f5f5f0;
+                border-top: 1px solid #e8e8e0;
+                font-size: 12px;
+                color: #666;
+                margin-top: auto;
+            }
+
+            .system-status {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .status-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #22c55e;
+            }
+
+            .session-id,
+            .version {
+                font-weight: 500;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Demo Controls */
+            .demo-controls {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px;
+                border-radius: 8px;
+                font-size: 12px;
+                z-index: 1000;
+            }
+
+            .demo-controls button {
+                background: #4caf50;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                margin: 2px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 11px;
+            }
+
+            .demo-controls button:hover {
+                background: #45a049;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="mobile-app">
+        <header class="mobile-header">
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                <span class="logo-text">ACCHU</span>
+            </div>
+            <button class="notification-btn">🔔</button>
+        </header>
+
+        <!-- Step Progress -->
+        <div class="step-progress">
+            <div class="step completed">
+                <span class="step-number">01</span>
+                <span class="step-label">UPLOAD</span>
+            </div>
+            <div class="step completed">
+                <span class="step-number">02</span>
+                <span class="step-label">CONFIG</span>
+            </div>
+            <div class="step active">
+                <span class="step-number">03</span>
+                <span class="step-label">PRINT</span>
+            </div>
+        </div>
+
+        <main class="mobile-main">
+            <div class="print-step">
+                <h1 class="step-title">PRINT STATUS</h1>
+                <p class="step-subtitle">
+                    Your documents are being processed.<br />
+                    Preparing print jobs...
+                </p>
+
+                <div class="print-status-card">
+                    <div class="document-preview">
+                        <div class="doc-icon">📄</div>
+                        <div class="doc-info">
+                            <div class="doc-title">DOCUMENT</div>
+                            <div class="doc-count">2 files</div>
+                        </div>
+                    </div>
+
+                    <div class="print-progress-section">
+                        <div class="status-pending" id="status-pending">
+                            <div class="status-icon">⏳</div>
+                            <div class="status-text">
+                                <div class="status-title">Processing</div>
+                                <div class="status-desc">Preparing your documents...</div>
+                            </div>
+                        </div>
+
+                        <div class="status-printing" id="status-printing" style="display: none;">
+                            <div class="status-icon">
+                                <div class="printing-spinner"></div>
+                            </div>
+                            <div class="status-text">
+                                <div class="status-title">Printing</div>
+                                <div class="status-desc">Your documents are printing...</div>
+                            </div>
+                        </div>
+
+                        <div class="status-completed" id="status-completed" style="display: none;">
+                            <div class="status-icon">✅</div>
+                            <div class="status-text">
+                                <div class="status-title">Completed</div>
+                                <div class="status-desc">Your documents are ready!</div>
+                            </div>
+                        </div>
+
+                        <div class="status-failed" id="status-failed" style="display: none;">
+                            <div class="status-icon">❌</div>
+                            <div class="status-text">
+                                <div class="status-title">Failed</div>
+                                <div class="status-desc">Print job failed. Please try again.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scan-to-pay-section">
+                    <div class="scan-icon-grid">
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                        <div class="scan-dot"></div>
+                    </div>
+                    <div class="scan-to-pay-text">SCAN TO PAY</div>
+                    <p class="scan-subtitle">
+                        Scan the QR code below to complete<br />
+                        your payment and start printing.
+                    </p>
+                </div>
+
+                <button class="start-print-btn" id="start-print-btn" onclick="startPrint()">
+                    <span class="print-icon">🖨</span>
+                    <span>START PRINTING</span>
+                </button>
+
+                <button class="retry-print-btn" id="retry-print-btn" onclick="retryPrint()" style="display: none;">
+                    <span class="retry-icon">🔄</span>
+                    <span>RETRY PRINT</span>
+                </button>
+
+                <button class="collect-btn" id="collect-btn" disabled style="display: none;">
+                    <span class="collect-icon">📋</span>
+                    <span>COLLECT YOUR DOCUMENTS</span>
+                </button>
+            </div>
+        </main>
+
+        <footer class="mobile-footer">
+            <div class="system-status">
+                <div class="status-dot"></div>
+                <span>SYSTEM OPERATIONAL</span>
+            </div>
+            <div class="session-id">ID: #1234</div>
+            <div class="version">v2.4.0</div>
+        </footer>
+    </div>
+
+    <!-- Demo Controls -->
+    <div class="demo-controls">
+        <div>Demo Controls:</div>
+        <button onclick="showPending()">Pending</button>
+        <button onclick="showPrinting()">Printing</button>
+        <button onclick="showCompleted()">Completed</button>
+        <button onclick="showFailed()">Failed</button>
+    </div>
+
+    <script>
+        let currentStatus = 'pending';
+
+        function hideAllStatuses() {
+            document.getElementById('status-pending').style.display = 'none';
+            document.getElementById('status-printing').style.display = 'none';
+            document.getElementById('status-completed').style.display = 'none';
+            document.getElementById('status-failed').style.display = 'none';
+
+            document.getElementById('start-print-btn').style.display = 'none';
+            document.getElementById('retry-print-btn').style.display = 'none';
+            document.getElementById('collect-btn').style.display = 'none';
+        }
+
+        function showPending() {
+            hideAllStatuses();
+            document.getElementById('status-pending').style.display = 'flex';
+            document.getElementById('start-print-btn').style.display = 'flex';
+            currentStatus = 'pending';
+        }
+
+        function showPrinting() {
+            hideAllStatuses();
+            document.getElementById('status-printing').style.display = 'flex';
+            currentStatus = 'printing';
+        }
+
+        function showCompleted() {
+            hideAllStatuses();
+            document.getElementById('status-completed').style.display = 'flex';
+            document.getElementById('collect-btn').style.display = 'flex';
+            currentStatus = 'completed';
+        }
+
+        function showFailed() {
+            hideAllStatuses();
+            document.getElementById('status-failed').style.display = 'flex';
+            document.getElementById('retry-print-btn').style.display = 'flex';
+            currentStatus = 'failed';
+        }
+
+        function startPrint() {
+            console.log('Starting print job...');
+
+            // Simulate print job submission
+            showPrinting();
+
+            // Simulate print completion after 3 seconds
+            setTimeout(() => {
+                showCompleted();
+            }, 3000);
+        }
+
+        function retryPrint() {
+            console.log('Retrying print job...');
+            startPrint();
+        }
+
+        // Test the actual API
+        async function testPrintAPI() {
+            try {
+                const response = await fetch('http://localhost:3001/api/print-jobs/demo-session/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        printOptions: {
+                            copies: 1,
+                            colorMode: 'bw',
+                            duplex: false,
+                            paperSize: 'A4'
+                        },
+                        files: [{
+                            name: 'test.pdf'
+                        }]
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Print API test result:', result);
+
+                if (result.success) {
+                    alert('Print job created successfully! Job ID: ' + result.data.jobId);
+                } else {
+                    alert('Print job failed: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Print API test error:', error);
+                alert('Print API test failed: ' + error.message);
+            }
+        }
+
+        // Add API test button
+        const demoControls = document.querySelector('.demo-controls');
+        const testButton = document.createElement('button');
+        testButton.textContent = 'Test API';
+        testButton.onclick = testPrintAPI;
+        demoControls.appendChild(testButton);
+    </script>
+</body>
+
+</html>

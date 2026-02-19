@@ -6,259 +6,855 @@
 .mobile-app .payment-section,
 .mobile-app .printing-section,
 .mobile-app .completion-section {
-  display: block;
-  background: transparent;
-  padding: 0;
-  box-shadow: none;
-  border-radius: 0;
+    display: block;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
 }
 
 /* File Upload Component Integration */
 .upload-step .file-upload-container {
-  display: none; /* Hide the original file upload UI since we're using our custom design */
+    display: none;
+    /* Hide the original file upload UI since we're using our custom design */
 }
 
 /* Print Options Integration */
 .config-step .print-options-container {
-  background: #f8f8f8;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
+    background: #f8f8f8;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
 }
 
 .config-step .options-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .config-step .option-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .config-step .option-group:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .config-step .option-group label {
-  font-size: 16px;
-  font-weight: 500;
-  color: #1a1a1a;
-  min-width: auto;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    min-width: auto;
 }
 
 .config-step .option-group select,
 .config-step .option-group input {
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 16px;
-  background: white;
-  min-width: 120px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    background: white;
+    min-width: 120px;
 }
 
 /* Payment Interface Integration */
 .config-step .payment-interface {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 .config-step .pay-button {
-  width: 100%;
-  padding: 16px;
-  background: #1a1a1a;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  letter-spacing: 0.02em;
+    width: 100%;
+    padding: 16px;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    letter-spacing: 0.02em;
 }
 
 .config-step .pay-button:hover:not(:disabled) {
-  background: #333;
-  transform: translateY(-1px);
+    background: #333;
+    transform: translateY(-1px);
 }
 
 .config-step .pay-button:disabled {
-  background: #999;
-  cursor: not-allowed;
-  transform: none;
+    background: #999;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Error States */
 .error-banner {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 16px 20px;
-  margin: 0 20px 20px;
-  border-radius: 12px;
-  border: 1px solid #fecaca;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 16px 20px;
+    margin: 0 20px 20px;
+    border-radius: 12px;
+    border: 1px solid #fecaca;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .error-banner p {
-  margin: 0;
-  font-weight: 500;
-  font-size: 14px;
+    margin: 0;
+    font-weight: 500;
+    font-size: 14px;
 }
 
 .close-error {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #991b1b;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #991b1b;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
 }
 
 .close-error:hover {
-  background-color: rgba(153, 27, 27, 0.1);
+    background-color: rgba(153, 27, 27, 0.1);
 }
 
 /* Progress Animations */
 .upload-step,
 .config-step,
 .print-step {
-  animation: slideInUp 0.4s ease-out;
+    animation: slideInUp 0.4s ease-out;
 }
 
 @keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Loading States */
 .loading-state .loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
 }
 
 .loading-state .loading-content::before {
-  content: '';
-  width: 32px;
-  height: 32px;
-  border: 3px solid #e0e0e0;
-  border-top: 3px solid #1a1a1a;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e0e0e0;
+    border-top: 3px solid #1a1a1a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 /* File Upload Progress */
 .file-item.uploading {
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 .file-item.uploading .file-meta {
-  color: #1a1a1a;
-  font-weight: 600;
+    color: #1a1a1a;
+    font-weight: 600;
 }
 
 .file-item.uploading::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  background: #1a1a1a;
-  animation: uploadProgress 2s ease-in-out;
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #1a1a1a;
+    animation: uploadProgress 2s ease-in-out;
 }
 
 @keyframes uploadProgress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
 }
 
 /* Print Job Success Animation */
 .print-step.completed .qr-frame {
-  animation: successPulse 0.6s ease-out;
+    animation: successPulse 0.6s ease-out;
 }
 
 @keyframes successPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 /* Responsive Adjustments */
 @media (max-width: 375px) {
-  .step-title {
-    font-size: 28px;
-  }
-  
-  .qr-frame {
-    width: 240px;
-    height: 240px;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .action-btn {
-    flex-direction: row;
-    justify-content: center;
-    padding: 12px 20px;
-  }
+    .step-title {
+        font-size: 28px;
+    }
+
+    .qr-frame {
+        width: 240px;
+        height: 240px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-btn {
+        flex-direction: row;
+        justify-content: center;
+        padding: 12px 20px;
+    }
 }
 
 /* Dark mode support (if needed later) */
 @media (prefers-color-scheme: dark) {
-  .mobile-app {
+    .mobile-app {
+        background: #1a1a1a;
+        color: #f5f5f5;
+    }
+
+    .mobile-header {
+        background: #1a1a1a;
+        border-bottom-color: #333;
+    }
+
+    .step-progress {
+        background: #2a2a2a;
+        border-bottom-color: #333;
+    }
+
+    .mobile-main {
+        background: #2a2a2a;
+    }
+
+    .mobile-footer {
+        background: #1a1a1a;
+        border-top-color: #333;
+    }
+}
+
+/* Queue Status Styles */
+.queue-status-frame {
+    width: 280px;
+    height: 280px;
+    margin: 40px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 20px;
+    border: 3px solid #1a1a1a;
+    position: relative;
+}
+
+.queue-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.queue-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.printer-icon {
+    font-size: 64px;
+    margin-bottom: 8px;
+}
+
+.queue-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.queue-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #d0d0d0;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: #22c55e;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+.queue-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.1em;
+}
+
+.queue-instruction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 30px 0;
+}
+
+.status-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.status-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #22c55e;
+    letter-spacing: 0.05em;
+}
+
+.status-subtitle {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Print Progress Styles */
+.print-progress {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #e9ecef;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.progress-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+}
+
+.progress-status {
+    font-size: 14px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.progress-status.queued {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.progress-status.printing {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.progress-status.completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.progress-status.failed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    margin: 12px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-message {
+    font-size: 14px;
+    color: #374151;
+    margin-top: 8px;
+    text-align: center;
+}
+
+.progress-error {
+    font-size: 14px;
+    color: #dc2626;
+    margin-top: 8px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Customer Info Section */
+.customer-info-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 30px 0;
+    border: 1px solid #e5e7eb;
+}
+
+.customer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.customer-icon {
+    font-size: 24px;
+}
+
+.customer-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.order-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.summary-row:not(.total) {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.summary-row.total {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 2px solid #1a1a1a;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.summary-row span:first-child {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.summary-row span:last-child {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* Responsive adjustments for queue status */
+@media (max-width: 375px) {
+    .queue-status-frame {
+        width: 240px;
+        height: 240px;
+    }
+
+    .printer-icon {
+        font-size: 48px;
+    }
+
+    .queue-label {
+        font-size: 16px;
+    }
+
+    .status-text {
+        font-size: 18px;
+    }
+}
+
+.payment-processing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.processing-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.payment-processing span {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.payment-processing p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    margin-top: 16px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* UPI Payment QR Section */
+.payment-qr-section {
+    background: #6366f1;
+    border-radius: 20px;
+    padding: 30px 20px;
+    margin: 30px 0;
+    color: white;
+    text-align: center;
+}
+
+.payment-qr-section .qr-frame {
+    width: 200px;
+    height: 200px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upi-qr-code {
+    width: 160px;
+    height: 160px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 2px;
+    width: 120px;
+    height: 120px;
+}
+
+.qr-cell {
+    background: #f0f0f0;
+    border-radius: 1px;
+}
+
+.qr-cell.filled {
     background: #1a1a1a;
-    color: #f5f5f5;
-  }
-  
-  .mobile-header {
+}
+
+.payment-details {
+    color: white;
+}
+
+.upi-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.upi-icon {
+    font-size: 24px;
+}
+
+.upi-text {
+    text-align: left;
+}
+
+.upi-title {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
+    letter-spacing: 0.05em;
+}
+
+.upi-amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+}
+
+.scan-instruction span {
+    font-size: 16px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+.scan-instruction p {
+    font-size: 14px;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* Print Summary */
+.print-summary {
+    background: #f8f8f8;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 30px 0;
+}
+
+.summary-header {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 2px solid #1a1a1a;
+}
+
+.summary-row.total {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.summary-row span:first-child {
+    color: #666;
+    font-weight: 500;
+}
+
+.summary-row span:last-child {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* Enhanced Completion Message */
+.completion-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.completion-message .success-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.completion-message span {
+    font-size: 20px;
+    font-weight: 700;
+    color: #22c55e;
+}
+
+.completion-message p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    text-align: center;
+}
+
+/* Enhanced Printing Indicator */
+.printing-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.printing-indicator span {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 430px) {
+    .payment-qr-section {
+        margin: 20px -20px;
+        border-radius: 0;
+    }
+
+    .payment-qr-section .qr-frame {
+        width: 180px;
+        height: 180px;
+    }
+
+    .upi-qr-code {
+        width: 140px;
+        height: 140px;
+    }
+
+    .qr-grid {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Ready to Print State */
+.ready-to-print {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.print-icon-large {
+    font-size: 64px;
+    margin-bottom: 8px;
+}
+
+.ready-to-print span {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.ready-to-print p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    text-align: center;
+}
+
+/* Fix for broken UI */
+.print-step {
+    padding: 20px;
+    min-height: 400px;
+}
+
+.print-status-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px 20px;
+    margin: 30px 0;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.confirm-print-btn {
+    width: 100%;
+    padding: 18px;
     background: #1a1a1a;
-    border-bottom-color: #333;
-  }
-  
-  .step-progress {
-    background: #2a2a2a;
-    border-bottom-color: #333;
-  }
-  
-  .mobile-main {
-    background: #2a2a2a;
-  }
-  
-  .mobile-footer {
-    background: #1a1a1a;
-    border-top-color: #333;
-  }
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+}
+
+.confirm-print-btn:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.confirm-print-btn .print-icon {
+    font-size: 20px;
 }

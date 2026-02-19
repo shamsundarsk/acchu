@@ -58,6 +58,7 @@ export function WebSocketProvider({ children, sessionId }: WebSocketProviderProp
         break;
 
       case 'print-status-update':
+      case 'print-job-status-update':
         setPrintStatus({
           jobId: message.jobId || '',
           status: message.data?.status,
@@ -66,6 +67,21 @@ export function WebSocketProvider({ children, sessionId }: WebSocketProviderProp
           error: message.data?.error,
           timestamp: message.timestamp || new Date().toISOString()
         });
+        break;
+
+      case 'print-job-created':
+        // Handle print job creation confirmation
+        if (message.data?.success) {
+          setPrintStatus({
+            jobId: message.jobId || '',
+            status: message.data?.status || JobStatus.QUEUED,
+            progress: 0,
+            message: message.data?.message || 'Print job created successfully',
+            timestamp: message.timestamp || new Date().toISOString()
+          });
+        } else {
+          setErrorMessage(message.data?.error || 'Failed to create print job');
+        }
         break;
 
       case 'printer-status-update':

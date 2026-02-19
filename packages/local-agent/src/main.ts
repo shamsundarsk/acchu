@@ -143,13 +143,33 @@ class LocalAgentApp {
     });
 
     ipcMain.handle('print:execute-job', async (_, jobId: string) => {
-      // This would need to be implemented properly
-      // For now, return a mock response
-      return { success: true, jobId };
+      try {
+        const sessionId = 'current-session'; // This should be tracked properly
+        const sessionDir = this.sessionManager.getSessionDirectory(sessionId);
+        if (!sessionDir) {
+          return { success: false, error: 'Session directory not found' };
+        }
+        
+        const result = await this.printManager.executePrintJob(jobId, sessionDir);
+        return result;
+      } catch (error) {
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        };
+      }
     });
 
     ipcMain.handle('print:get-status', async () => {
       return this.printManager.getPrinterStatus();
+    });
+
+    ipcMain.handle('print:get-all-jobs', async () => {
+      return this.printManager.getAllPrintJobs();
+    });
+
+    ipcMain.handle('print:get-progress', async (_, jobId: string) => {
+      return this.printManager.getPrintProgress(jobId);
     });
 
     // Configuration management handlers

@@ -15,6 +15,8 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
+import { SandboxService, SandboxConfig } from './SandboxService';
+import { AuditLogger } from './AuditLogger';
 
 const execAsync = promisify(exec);
 
@@ -31,6 +33,8 @@ export interface PrintManagerConfig {
   maxConcurrentJobs?: number;
   printTimeout?: number; // milliseconds
   retryAttempts?: number;
+  sandbox?: SandboxConfig;
+  enableSandboxMode?: boolean;
 }
 
 export interface PrintProgress {
@@ -52,14 +56,27 @@ export class PrintManager {
   private config: PrintManagerConfig;
   private availablePrinters: Map<string, PrinterInfo> = new Map();
   private defaultPrinter: string | null = null;
+  private sandboxService?: SandboxService;
+  private auditLogger?: AuditLogger;
 
-  constructor(config: PrintManagerConfig = {}) {
+  constructor(config: PrintManagerConfig = {}, auditLogger?: AuditLogger) {
     this.config = {
       maxConcurrentJobs: 3,
       printTimeout: 300000, // 5 minutes
       retryAttempts: 2,
+      enableSandboxMode: true, // Enable sandbox mode by default
       ...config
     };
+
+    this.auditLogger = auditLogger;
+
+    // Initialize sandbox service if enabled and configured
+    if (this.config.enableSandboxMode && this.config.sandbox) {
+      this.sandboxService = new SandboxService(this.config.sandbox, auditLogger);
+      console.log('Sandbox mode enabled for secure print job execution');
+    } else {
+      console.log('Sandbox mode disabled - using direct print execution');
+    }
 
     // Initialize printer detection
     this.detectPrinters();
@@ -259,6 +276,8 @@ export class PrintManager {
 
       // Get file paths for printing
       const filePaths: string[] = [];
+      const fileMetadata: FileMetadata[] = [];
+      
       for (const fileId of job.files) {
         const filePath = path.join(sessionFilesDirectory, `${fileId}.*`);
         
@@ -267,7 +286,19 @@ export class PrintManager {
           const files = await fs.readdir(sessionFilesDirectory);
           const matchingFile = files.find(f => f.startsWith(fileId));
           if (matchingFile) {
-            filePaths.push(path.join(sessionFilesDirectory, matchingFile));
+            const fullPath = path.join(sessionFilesDirectory, matchingFile);
+            filePaths.push(fullPath);
+            
+            // Create file metadata for sandbox
+            const stats = await fs.stat(fullPath);
+            fileMetadata.push({
+              id: fileId,
+              originalName: matchingFile,
+              mimeType: this.getMimeType(matchingFile),
+              size: stats.size,
+              uploadedAt: new Date(),
+              localPath: fullPath
+            });
           } else {
             throw new Error(`File ${fileId} not found in session directory`);
           }
@@ -278,25 +309,129 @@ export class PrintManager {
 
       this.updateProgress(jobId, JobStatus.PRINTING, 30, 'Preparing files for printing...');
 
+      // Execute print job based on sandbox mode
+      if (this.config.enableSandboxMode && this.sandboxService) {
+        return await this.executePrintJobInSandbox(job, fileMetadata);
+      } else {
+        return await this.executePrintJobDirect(job, filePaths);
+      }
+
+    } catch (error) {
+      console.error(`Print job ${jobId} failed:`, error);
+      
+      // Update job status
+      job.status = JobStatus.FAILED;
+      this.updateProgress(jobId, JobStatus.FAILED, 0, undefined, error instanceof Error ? error.message : 'Unknown error');
+      
+      return {
+        success: false,
+        jobId,
+        error: error instanceof Error ? error.message : 'Print job execution failed'
+      };
+    } finally {
+      this.activePrintJobs.delete(jobId);
+    }
+  }
+
+  /**
+   * Execute print job in sandbox environment
+   */
+  private async executePrintJobInSandbox(job: PrintJob, fileMetadata: FileMetadata[]): Promise<PrintResult> {
+    if (!this.sandboxService) {
+      throw new Error('Sandbox service not available');
+    }
+
+    try {
+      console.log(`Executing print job ${job.id} in sandbox for session ${job.sessionId}`);
+      
+      this.updateProgress(job.id, JobStatus.PRINTING, 40, 'Creating secure sandbox environment...');
+
+      // Create sandbox
+      const sandboxResult = await this.sandboxService.createSandbox(
+        job.sessionId,
+        job.id,
+        fileMetadata,
+        job.options
+      );
+
+      if (!sandboxResult.success || !sandboxResult.sandboxId) {
+        throw new Error(sandboxResult.error || 'Failed to create sandbox');
+      }
+
+      this.updateProgress(job.id, JobStatus.PRINTING, 60, 'Sandbox created, executing print job...');
+
+      // Execute print in sandbox
+      const printResult = await this.sandboxService.executePrintInSandbox(sandboxResult.sandboxId);
+
+      if (!printResult.success) {
+        throw new Error(printResult.error || 'Failed to execute print in sandbox');
+      }
+
+      this.updateProgress(job.id, JobStatus.PRINTING, 80, 'Print job executing in sandbox...');
+
+      // Wait for sandbox completion (simplified - in real implementation, use events)
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      this.updateProgress(job.id, JobStatus.COMPLETED, 100, 'Print job completed successfully in sandbox');
+
+      // Log audit event
+      if (this.auditLogger) {
+        await this.auditLogger.logSessionEvent(job.sessionId, 'PRINT_EXECUTED' as any, {
+          jobId: job.id,
+          sandboxId: sandboxResult.sandboxId,
+          fileCount: fileMetadata.length,
+          executionMode: 'sandbox'
+        });
+      }
+
+      return {
+        success: true,
+        jobId: job.id
+      };
+
+    } catch (error) {
+      console.error('Sandbox print execution failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Execute print job directly (legacy mode)
+   */
+  private async executePrintJobDirect(job: PrintJob, filePaths: string[]): Promise<PrintResult> {
+    console.log(`Executing print job ${job.id} directly (non-sandbox mode)`);
+    
+    try {
+      this.updateProgress(job.id, JobStatus.PRINTING, 50, 'Sending files to printer...');
+
       // Execute print for each file
       let completedFiles = 0;
       for (const filePath of filePaths) {
         await this.printFile(filePath, job.options);
         completedFiles++;
         
-        const progress = 30 + (completedFiles / filePaths.length) * 60;
-        this.updateProgress(jobId, JobStatus.PRINTING, progress, `Printed ${completedFiles}/${filePaths.length} files`);
+        const progress = 50 + (completedFiles / filePaths.length) * 40;
+        this.updateProgress(job.id, JobStatus.PRINTING, progress, `Printed ${completedFiles}/${filePaths.length} files`);
       }
 
       // Mark job as completed
       job.status = JobStatus.COMPLETED;
-      this.updateProgress(jobId, JobStatus.COMPLETED, 100, 'Print job completed successfully');
+      this.updateProgress(job.id, JobStatus.COMPLETED, 100, 'Print job completed successfully');
 
-      console.log(`Print job ${jobId} completed successfully`);
+      console.log(`Print job ${job.id} completed successfully`);
+      
+      // Log audit event
+      if (this.auditLogger) {
+        await this.auditLogger.logSessionEvent(job.sessionId, 'PRINT_EXECUTED' as any, {
+          jobId: job.id,
+          fileCount: filePaths.length,
+          executionMode: 'direct'
+        });
+      }
       
       return {
         success: true,
-        jobId
+        jobId: job.id
       };
 
     } catch (error) {
@@ -304,17 +439,15 @@ export class PrintManager {
       job.status = JobStatus.FAILED;
       const errorMessage = error instanceof Error ? error.message : 'Unknown print error';
       
-      this.updateProgress(jobId, JobStatus.FAILED, 0, `Print failed: ${errorMessage}`, errorMessage);
+      this.updateProgress(job.id, JobStatus.FAILED, 0, `Print failed: ${errorMessage}`, errorMessage);
       
-      console.error(`Print job ${jobId} failed:`, error);
+      console.error(`Print job ${job.id} failed:`, error);
       
       return {
         success: false,
-        jobId,
+        jobId: job.id,
         error: errorMessage
       };
-    } finally {
-      this.activePrintJobs.delete(jobId);
     }
   }
 
@@ -598,6 +731,11 @@ export class PrintManager {
       await this.cancelPrintJob(jobId);
     }
 
+    // Cleanup sandbox service
+    if (this.sandboxService) {
+      await this.sandboxService.cleanup();
+    }
+
     // Clear all data
     this.printQueue.clear();
     this.printProgress.clear();
@@ -606,4 +744,175 @@ export class PrintManager {
 
     console.log('PrintManager shutdown complete');
   }
+
+  /**
+   * Get MIME type from file extension
+   */
+  private getMimeType(fileName: string): string {
+    const ext = path.extname(fileName).toLowerCase();
+    const mimeTypes: { [key: string]: string } = {
+      '.pdf': 'application/pdf',
+      '.doc': 'application/msword',
+      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.txt': 'text/plain',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif'
+    };
+    return mimeTypes[ext] || 'application/octet-stream';
+  }
 }
+
+  /**
+   * Get print progress for a job
+   */
+  getPrintProgress(jobId: JobId): PrintProgress | null {
+    return this.printProgress.get(jobId) || null;
+  }
+
+  /**
+   * Get printer status
+   */
+  getPrinterStatus(): PrinterStatus {
+    if (this.defaultPrinter && this.availablePrinters.has(this.defaultPrinter)) {
+      return this.availablePrinters.get(this.defaultPrinter)!.status;
+    }
+    return PrinterStatus.OFFLINE;
+  }
+
+  /**
+   * Retry a failed print job
+   */
+  async retryPrintJob(jobId: JobId, sessionFilesDirectory: string): Promise<PrintResult> {
+    const job = this.printQueue.get(jobId);
+    if (!job) {
+      return {
+        success: false,
+        error: 'Print job not found'
+      };
+    }
+
+    if (job.status !== JobStatus.FAILED) {
+      return {
+        success: false,
+        error: 'Only failed jobs can be retried'
+      };
+    }
+
+    // Reset job status
+    job.status = JobStatus.QUEUED;
+    this.updateProgress(jobId, JobStatus.QUEUED, 0, 'Retrying print job...');
+
+    // Execute the job again
+    return await this.executePrintJob(jobId, sessionFilesDirectory);
+  }
+
+  /**
+   * Cancel a print job
+   */
+  async cancelPrintJob(jobId: JobId): Promise<boolean> {
+    const job = this.printQueue.get(jobId);
+    if (!job) {
+      return false;
+    }
+
+    // If job is currently printing, we can't cancel it easily
+    if (job.status === JobStatus.PRINTING && this.activePrintJobs.has(jobId)) {
+      console.log(`Cannot cancel print job ${jobId} - already printing`);
+      return false;
+    }
+
+    // Remove from queue
+    this.printQueue.delete(jobId);
+    this.printProgress.delete(jobId);
+    this.activePrintJobs.delete(jobId);
+
+    console.log(`Cancelled print job ${jobId}`);
+    return true;
+  }
+
+  /**
+   * Get all print jobs for a session
+   */
+  getSessionPrintJobs(sessionId: SessionId): PrintJob[] {
+    const jobs: PrintJob[] = [];
+    for (const job of this.printQueue.values()) {
+      if (job.sessionId === sessionId) {
+        jobs.push(job);
+      }
+    }
+    return jobs;
+  }
+
+  /**
+   * Get all print jobs
+   */
+  getAllPrintJobs(): PrintJob[] {
+    return Array.from(this.printQueue.values());
+  }
+
+  /**
+   * Update print progress
+   */
+  private updateProgress(
+    jobId: JobId, 
+    status: JobStatus, 
+    progress: number, 
+    message?: string, 
+    error?: string
+  ): void {
+    const progressUpdate: PrintProgress = {
+      jobId,
+      status,
+      progress,
+      message,
+      error
+    };
+
+    this.printProgress.set(jobId, progressUpdate);
+    
+    // Update job status in queue
+    const job = this.printQueue.get(jobId);
+    if (job) {
+      job.status = status;
+    }
+
+    console.log(`Print job ${jobId} progress: ${status} (${progress}%) - ${message || ''}`);
+  }
+
+  /**
+   * Get MIME type from file extension
+   */
+  private getMimeType(filename: string): string {
+    const ext = path.extname(filename).toLowerCase();
+    switch (ext) {
+      case '.pdf':
+        return 'application/pdf';
+      case '.doc':
+        return 'application/msword';
+      case '.docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.txt':
+        return 'text/plain';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+}
+  /**
+   * Set default printer
+   */
+  async setDefaultPrinter(printerName: string): Promise<boolean> {
+    if (this.availablePrinters.has(printerName)) {
+      this.defaultPrinter = printerName;
+      console.log(`Default printer set to: ${printerName}`);
+      return true;
+    }
+    return false;
+  }

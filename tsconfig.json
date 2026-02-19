@@ -19,7 +19,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
       "@sps/shared-types": ["./packages/shared-types/src"],

@@ -1,0 +1,3 @@
+Test file to debug 400 error
+Session: test-400-session
+Testing the corrected field names

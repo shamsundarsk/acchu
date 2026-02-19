@@ -4,13 +4,12 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  root: 'src/client',
   build: {
-    outDir: '../../dist/client',
+    outDir: 'dist/client',
     emptyOutDir: true,
   },
   server: {
-    port: 3000,
+    port: 3003,
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
@@ -20,7 +19,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@sps/shared-types': resolve(__dirname, '../shared-types/dist'),
+      '@sps/shared-types': resolve(__dirname, '../shared-types/src'),
     },
   },
 });

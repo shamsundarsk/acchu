@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - ACCHU Customer System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .error {
+            color: red;
+            background: #ffe6e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: green;
+            background: #e6ffe6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Debug - ACCHU Customer System</h1>
+    <div id="status">Loading...</div>
+    <div id="root"></div>
+
+    <script type="module">
+        try {
+      document.getElementById('status').innerHTML = '<div class="success">✅ JavaScript is working</div>';
+      
+      // Try to import the main module
+      import('./main.tsx').then(() => {
+        document.getElementById('status').innerHTML += '<div class="success">✅ React app loaded successfully</div>';
+      }).catch(error => {
+        document.getElementById('status').innerHTML += '<div class="error">❌ Error loading React app: ' + error.message + '</div>';
+        console.error('React app error:', error);
+      });
+    } catch (error) {
+      document.getElementById('status').innerHTML = '<div class="error">❌ JavaScript error: ' + error.message + '</div>';
+      console.error('JavaScript error:', error);
+    }
+  </script>
+</body>
+
+</html>

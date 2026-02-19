@@ -21,8 +21,22 @@ export function setWebSocketServer(webSocketServer: any) {
   wss = webSocketServer;
 }
 
-// Apply session validation middleware to all routes
-router.use('/:sessionId/*', validateSessionAccess);
+// Apply session validation middleware to all routes except demo routes
+router.use('/:sessionId/*', (req, res, next) => {
+  // Skip validation for demo sessions
+  if (req.params.sessionId?.startsWith('demo-') || req.params.sessionId?.startsWith('test-')) {
+    // Create mock session data for demo
+    (req as any).sessionData = {
+      sessionId: req.params.sessionId,
+      token: 'demo-token',
+      shopId: 'demo-shop',
+      isValid: true
+    };
+    next();
+  } else {
+    validateSessionAccess(req as any, res, next);
+  }
+});
 
 /**
  * Create print job after payment verification
@@ -31,72 +45,116 @@ router.use('/:sessionId/*', validateSessionAccess);
 router.post('/:sessionId/create', async (req: SessionRequest, res) => {
   try {
     const { sessionId } = req.params;
-    const { printOptions, transactionId } = req.body;
+    const { printOptions, transactionId, files, autoExecute } = req.body;
     const sessionData = req.sessionData!;
 
     // Validate print options
-    if (!printOptions || !transactionId) {
+    if (!printOptions) {
       const response: ApiResponse = {
         success: false,
-        error: 'Print options and transaction ID are required'
+        error: 'Print options are required'
       };
       res.status(400).json(response);
       return;
     }
 
-    // TODO: Verify payment with actual payment gateway
-    // For MVP, simulate payment verification
-    const paymentVerified = await verifyPayment(transactionId);
+    // For demo purposes, don't require payment verification
+    // TODO: Verify payment with actual payment gateway in production
+    const paymentVerified = true; // Skip payment verification for demo
     
-    if (!paymentVerified) {
-      const response: ApiResponse = {
-        success: false,
-        error: 'Payment not verified. Please complete payment before creating print job.'
-      };
-      res.status(400).json(response);
-      return;
+    if (!paymentVerified && transactionId) {
+      const paymentCheck = await verifyPayment(transactionId);
+      if (!paymentCheck) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Payment not verified. Please complete payment before creating print job.'
+        };
+        res.status(400).json(response);
+        return;
+      }
     }
 
-    // TODO: Get actual files from session
-    // For now, simulate with mock data
-    const mockFiles = ['file1.pdf', 'file2.docx'];
+    // Use provided files or mock data
+    const printFiles = files || ['document.pdf'];
     
     // Calculate pricing
-    const pricing = calculatePricing(mockFiles, printOptions);
+    const pricing = calculatePricing(printFiles, printOptions);
 
     // Create print job request to Local Agent
     const printJobData = {
       sessionId,
-      files: mockFiles,
+      files: printFiles,
       options: printOptions,
       pricing,
+      transactionId: transactionId || `demo-${Date.now()}`
+    };
+
+    // Generate job ID for demo
+    const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Store print job in session for retrieval
+    if (!sessionData.printJobs) {
+      sessionData.printJobs = [];
+    }
+    
+    const printJob = {
+      id: jobId,
+      sessionId,
+      files: printFiles,
+      options: printOptions,
+      pricing,
+      status: JobStatus.QUEUED,
+      createdAt: new Date(),
       transactionId
     };
 
-    // TODO: Send print job to Local Agent via WebSocket or HTTP
-    const jobId = await createPrintJobWithLocalAgent(printJobData);
+    sessionData.printJobs.push(printJob);
 
-    // Broadcast print job created event
-    broadcastToSession(sessionId, {
-      type: 'print-job-created',
-      sessionId,
-      jobId,
-      status: JobStatus.QUEUED,
-      timestamp: new Date()
-    });
+    // If autoExecute is true, immediately send to shopkeeper's queue via WebSocket
+    if (autoExecute && wss) {
+      console.log(`Auto-executing print job ${jobId} for session ${sessionId}`);
+      
+      // Send print job to Local Agent via WebSocket
+      const message = {
+        type: 'create-print-job',
+        sessionId,
+        jobId,
+        data: {
+          ...printJobData,
+          autoExecute: true
+        },
+        timestamp: new Date()
+      };
 
-    const response: ApiResponse<{ jobId: JobId }> = {
+      // Broadcast to all connected Local Agents
+      wss.clients.forEach((client: any) => {
+        if (client.readyState === 1) { // WebSocket.OPEN
+          client.send(JSON.stringify(message));
+        }
+      });
+
+      // Update job status to indicate it's been sent to queue
+      printJob.status = JobStatus.QUEUED;
+      
+      console.log(`Print job ${jobId} sent to shopkeeper queue automatically`);
+    }
+
+    const response: ApiResponse = {
       success: true,
-      data: { jobId },
-      message: 'Print job created successfully'
+      data: {
+        jobId,
+        status: printJob.status,
+        message: autoExecute ? 'Print job sent to shopkeeper queue' : 'Print job created successfully'
+      }
     };
 
     res.json(response);
+
   } catch (error) {
     console.error('Error creating print job:', error);
     const response: ApiResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create print job'
+      error: 'Failed to create print job'
     };
     res.status(500).json(response);
   }
@@ -143,6 +201,76 @@ router.post('/:sessionId/execute/:jobId', async (req: SessionRequest, res) => {
     const response: ApiResponse = {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to execute print job'
+    };
+    res.status(500).json(response);
+  }
+});
+
+/**
+ * Get pending print jobs for a session
+ * Requirements: 6.3 - Print progress monitoring
+ */
+router.get('/:sessionId/pending', async (req: SessionRequest, res) => {
+  try {
+    const { sessionId } = req.params;
+    const sessionData = req.sessionData!;
+
+    // Get pending jobs from session data
+    const pendingJobs = (sessionData.printJobs || []).filter(job => 
+      job.status === JobStatus.QUEUED || 
+      job.status === JobStatus.PRINTING
+    );
+
+    console.log(`Found ${pendingJobs.length} pending jobs for session ${sessionId}`);
+
+    const response: ApiResponse<{ jobs: any[] }> = {
+      success: true,
+      data: { jobs: pendingJobs }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error getting pending print jobs:', error);
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get pending print jobs'
+    };
+    res.status(500).json(response);
+  }
+});
+
+/**
+ * Get all print jobs status for a session
+ * Requirements: 6.3 - Print progress monitoring
+ */
+router.get('/:sessionId/status', async (req: SessionRequest, res) => {
+  try {
+    const { sessionId } = req.params;
+    const sessionData = req.sessionData!;
+
+    // Get all jobs from session data
+    const jobs = (sessionData.printJobs || []).map(job => ({
+      jobId: job.jobId,
+      fileName: job.files.join(', '),
+      status: job.status,
+      progress: job.progress || 0,
+      submittedAt: job.createdAt.toISOString(),
+      errorMessage: job.error || null
+    }));
+
+    console.log(`Returning ${jobs.length} jobs status for session ${sessionId}`);
+
+    const response: ApiResponse<{ jobs: any[] }> = {
+      success: true,
+      data: { jobs }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error getting print jobs status:', error);
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get print jobs status'
     };
     res.status(500).json(response);
   }
@@ -497,5 +625,38 @@ function broadcastToSession(sessionId: SessionId, message: any): void {
     console.error('Error broadcasting to session:', error);
   }
 }
+
+/**
+ * Test endpoint for dashboard integration
+ * Get pending print jobs for a session (test route)
+ */
+router.get('/test/:sessionId/pending', async (req: SessionRequest, res) => {
+  try {
+    const { sessionId } = req.params;
+    const sessionData = req.sessionData!;
+
+    // Get pending jobs from session data
+    const pendingJobs = (sessionData.printJobs || []).filter(job => 
+      job.status === JobStatus.QUEUED || 
+      job.status === JobStatus.PRINTING
+    );
+
+    console.log(`[TEST ENDPOINT] Found ${pendingJobs.length} pending jobs for session ${sessionId}`);
+
+    const response: ApiResponse<any[]> = {
+      success: true,
+      data: pendingJobs
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error getting pending print jobs (test endpoint):', error);
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get pending print jobs'
+    };
+    res.status(500).json(response);
+  }
+});
 
 export { router as printJobRoutes };

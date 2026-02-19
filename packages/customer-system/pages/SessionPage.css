@@ -1,0 +1,1709 @@
+/* SessionPage.css - Mobile-Optimized Styles */
+
+/* Override any conflicting styles from the main mobile design */
+.mobile-app .upload-section,
+.mobile-app .print-config-section,
+.mobile-app .payment-section,
+.mobile-app .printing-section,
+.mobile-app .completion-section {
+    display: block;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+/* File Upload Component Integration */
+.upload-step .file-upload-container {
+    display: none;
+    /* Hide the original file upload UI since we're using our custom design */
+}
+
+/* Print Options Integration */
+.config-step .print-options-container {
+    background: #f8f8f8;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.config-step .options-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.config-step .option-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.config-step .option-group:last-child {
+    border-bottom: none;
+}
+
+.config-step .option-group label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    min-width: auto;
+}
+
+.config-step .option-group select,
+.config-step .option-group input {
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    background: white;
+    min-width: 120px;
+}
+
+/* Payment Interface Integration */
+.config-step .payment-interface {
+    margin-top: 20px;
+}
+
+.config-step .pay-button {
+    width: 100%;
+    padding: 16px;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+}
+
+.config-step .pay-button:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.config-step .pay-button:disabled {
+    background: #999;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Error States */
+.error-banner {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 16px 20px;
+    margin: 0 20px 20px;
+    border-radius: 12px;
+    border: 1px solid #fecaca;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error-banner p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.close-error {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #991b1b;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.close-error:hover {
+    background-color: rgba(153, 27, 27, 0.1);
+}
+
+/* Progress Animations */
+.upload-step,
+.config-step,
+.print-step {
+    animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading States */
+.loading-state .loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.loading-state .loading-content::before {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e0e0e0;
+    border-top: 3px solid #1a1a1a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* File Upload Progress */
+.file-item.uploading {
+    opacity: 0.7;
+}
+
+.file-item.uploading .file-meta {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.file-item.uploading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #1a1a1a;
+    animation: uploadProgress 2s ease-in-out;
+}
+
+@keyframes uploadProgress {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+/* Print Job Success Animation */
+.print-step.completed .qr-frame {
+    animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 375px) {
+    .step-title {
+        font-size: 28px;
+    }
+
+    .qr-frame {
+        width: 240px;
+        height: 240px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-btn {
+        flex-direction: row;
+        justify-content: center;
+        padding: 12px 20px;
+    }
+}
+
+/* Dark mode support (if needed later) */
+@media (prefers-color-scheme: dark) {
+    .mobile-app {
+        background: #1a1a1a;
+        color: #f5f5f5;
+    }
+
+    .mobile-header {
+        background: #1a1a1a;
+        border-bottom-color: #333;
+    }
+
+    .step-progress {
+        background: #2a2a2a;
+        border-bottom-color: #333;
+    }
+
+    .mobile-main {
+        background: #2a2a2a;
+    }
+
+    .mobile-footer {
+        background: #1a1a1a;
+        border-top-color: #333;
+    }
+}
+
+/* Demo Navigation Styles */
+.demo-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #000;
+    color: #fff;
+    padding: 10px;
+    z-index: 9999;
+    font-size: 12px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.demo-nav a {
+    color: #00ff00;
+    text-decoration: none;
+}
+
+.demo-nav a:hover {
+    text-decoration: underline;
+}
+
+/* Step Progress Styles */
+.step-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    gap: 40px;
+    background: #f5f5f0;
+    border-bottom: 1px solid #e8e8e0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.step.active,
+.step.completed {
+    opacity: 1;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background: #1a1a1a;
+    color: white;
+}
+
+.step.completed .step-number {
+    background: #22c55e;
+    color: white;
+}
+
+.step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    letter-spacing: 0.05em;
+}
+
+.step.active .step-label,
+.step.completed .step-label {
+    color: #1a1a1a;
+}
+
+/* Upload Step Styles */
+.upload-step {
+    padding: 20px;
+}
+
+.step-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+}
+
+.step-subtitle {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 30px 0;
+    line-height: 1.4;
+}
+
+.upload-area {
+    background: #f8f8f8;
+    border: 2px dashed #d0d0d0;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    margin: 20px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    border-color: #1a1a1a;
+    background: #f0f0f0;
+}
+
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.upload-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+}
+
+.file-types {
+    font-size: 14px;
+    color: #666;
+}
+
+.import-section {
+    margin: 30px 0;
+}
+
+.section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+
+.import-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.import-btn:hover {
+    border-color: #1a1a1a;
+    background: #f8f8f8;
+}
+
+.import-icon {
+    font-size: 20px;
+}
+
+.pending-queue {
+    margin-top: 30px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-icon {
+    font-size: 24px;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.file-meta {
+    font-size: 14px;
+    color: #666;
+}
+
+.remove-file {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    border: none;
+    color: #666;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.remove-file:hover {
+    background: #e0e0e0;
+    color: #1a1a1a;
+}
+
+.continue-btn {
+    width: 100%;
+    padding: 16px;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 20px;
+    letter-spacing: 0.02em;
+}
+
+.continue-btn:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+/* Config Step Styles */
+.config-step {
+    padding: 20px;
+}
+
+.print-options {
+    background: #f8f8f8;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.option-group {
+    margin-bottom: 24px;
+}
+
+.option-group:last-child {
+    margin-bottom: 0;
+}
+
+.option-label {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+}
+
+.option-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.option-btn {
+    flex: 1;
+    padding: 12px 16px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-btn.active {
+    border-color: #1a1a1a;
+    background: #1a1a1a;
+    color: white;
+}
+
+.option-btn:hover:not(.active) {
+    border-color: #666;
+}
+
+.copy-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+}
+
+.copy-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #e0e0e0;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    border-color: #1a1a1a;
+}
+
+.copy-count {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pricing-summary {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #e0e0e0;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 16px;
+}
+
+.price-row.total {
+    border-top: 1px solid #e0e0e0;
+    margin-top: 12px;
+    padding-top: 16px;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.payment-section {
+    margin-top: 30px;
+}
+
+.payment-options {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.payment-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.payment-btn.active {
+    border-color: #1a1a1a;
+    background: #1a1a1a;
+    color: white;
+}
+
+.payment-btn:hover:not(.active) {
+    border-color: #666;
+}
+
+.payment-icon {
+    font-size: 24px;
+}
+
+.pay-btn {
+    width: 100%;
+    padding: 16px;
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+}
+
+.pay-btn:hover {
+    background: #16a34a;
+    transform: translateY(-1px);
+}
+
+/* Print Step Styles - Updated for Print Job Confirmed */
+.print-step {
+    padding: 20px;
+    text-align: center;
+    background: #f5f5f0;
+    color: #1a1a1a;
+    min-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.step-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 20px 0 40px 0;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.qr-frame {
+    margin: 20px 0 40px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.qr-container {
+    background: white;
+    border: 4px solid #1a1a1a;
+    border-radius: 0;
+    padding: 30px;
+    box-shadow: none;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+}
+
+.qr-code {
+    width: 180px;
+    height: 180px;
+    background: #f0f0f0;
+    border: 2px solid #1a1a1a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.qr-pattern {
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-squares {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 120px;
+    height: 120px;
+}
+
+.qr-square {
+    background: #1a1a1a;
+    border-radius: 2px;
+}
+
+.qr-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+.scan-instruction {
+    margin: 20px 0 40px 0;
+    text-align: center;
+    color: #1a1a1a;
+}
+
+.scan-icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.scan-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+}
+
+.scan-subtitle {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* UPI Payment Section */
+.upi-payment-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+    text-align: center;
+    width: 100%;
+    max-width: 350px;
+    border: 1px solid #e0e0e0;
+}
+
+.upi-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.upi-icon {
+    font-size: 20px;
+}
+
+.upi-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.upi-qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.upi-qr-code {
+    width: 220px;
+    height: 220px;
+    background: white;
+    border: 2px solid #1a1a1a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 0 auto;
+}
+
+.upi-qr-pattern {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upi-qr-squares {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    width: 180px;
+    height: 180px;
+}
+
+.upi-qr-square {
+    background: #1a1a1a;
+    border-radius: 1px;
+}
+
+.upi-qr-square:nth-child(odd) {
+    background: #1a1a1a;
+}
+
+.upi-qr-square:nth-child(even) {
+    background: transparent;
+}
+
+.upi-qr-square:nth-child(3n) {
+    background: #1a1a1a;
+}
+
+.upi-qr-square:nth-child(7n) {
+    background: transparent;
+}
+
+.gpay-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #1a1a1a;
+}
+
+.gpay-icon {
+    font-size: 18px;
+}
+
+.upi-id {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-family: monospace;
+    text-align: center;
+}
+
+.upi-instruction {
+    font-size: 16px;
+    color: #666;
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .print-step {
+        padding: 16px;
+    }
+
+    .step-title {
+        font-size: 28px;
+        margin: 16px 0 30px 0;
+    }
+
+    .qr-container {
+        width: 260px;
+        height: 260px;
+        padding: 25px;
+    }
+
+    .qr-code {
+        width: 160px;
+        height: 160px;
+    }
+
+    .qr-pattern {
+        width: 140px;
+        height: 140px;
+    }
+
+    .qr-squares {
+        width: 100px;
+        height: 100px;
+    }
+
+    .upi-qr-code {
+        width: 200px;
+        height: 200px;
+    }
+
+    .upi-qr-pattern {
+        width: 180px;
+        height: 180px;
+    }
+
+    .upi-qr-squares {
+        width: 160px;
+        height: 160px;
+    }
+
+    .upi-payment-section {
+        max-width: 320px;
+        padding: 20px;
+    }
+}
+
+.print-details {
+    background: #f8f8f8;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 30px 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 16px;
+}
+
+.confirm-print-btn {
+    width: 100%;
+    padding: 16px;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+    letter-spacing: 0.02em;
+}
+
+.confirm-print-btn:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.print-icon {
+    font-size: 20px;
+}
+
+.print-status {
+    margin-top: 20px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #22c55e;
+}
+
+.status-dot.green {
+    background: #22c55e;
+}
+
+/* Mobile Footer */
+.mobile-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f5f5f0;
+    border-top: 1px solid #e8e8e0;
+    font-size: 12px;
+    color: #666;
+    margin-top: auto;
+}
+
+.system-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.session-id,
+.version {
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .step-progress {
+        gap: 20px;
+        padding: 16px;
+    }
+
+    .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .step-label {
+        font-size: 10px;
+    }
+
+    .upload-step,
+    .config-step,
+    .print-step {
+        padding: 16px;
+    }
+
+    .step-title {
+        font-size: 24px;
+    }
+
+    .qr-code {
+        width: 160px;
+        height: 160px;
+    }
+
+    .qr-pattern {
+        width: 120px;
+        height: 120px;
+    }
+
+    .qr-squares {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* File Selector Styles */
+.file-selector {
+    margin: 20px 0;
+}
+
+.file-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0;
+}
+
+.file-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.file-tab.active {
+    border-color: #1a1a1a;
+    background: #1a1a1a;
+    color: white;
+}
+
+.file-tab:hover:not(.active) {
+    border-color: #666;
+}
+
+.file-tab-icon {
+    font-size: 20px;
+}
+
+.file-tab-name {
+    font-size: 10px;
+    text-align: center;
+    word-break: break-word;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Custom Range Input */
+.custom-range-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.custom-range-input:focus {
+    outline: none;
+    border-color: #1a1a1a;
+}
+
+.custom-range-input::placeholder {
+    color: #999;
+}
+
+/* Print Button */
+.print-btn {
+    width: 100%;
+    padding: 16px;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 30px;
+    letter-spacing: 0.02em;
+}
+
+.print-btn:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+/* UPI QR Code Styles */
+.upi-qr-code {
+    width: 200px;
+    height: 200px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.upi-qr-code::before {
+    content: "UPI";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.qr-sublabel {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+/* Payment Instruction Styles */
+.payment-instruction {
+    margin: 30px 0;
+}
+
+.payment-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.payment-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+}
+
+.payment-subtitle {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Print Summary Styles */
+.print-summary {
+    background: #f8f8f8;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 30px 0;
+}
+
+.summary-content {
+    margin-top: 12px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 16px;
+}
+
+.summary-row:not(:last-child) {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Payment Note Styles */
+.payment-note {
+    background: #e6f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 20px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.note-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.note-text {
+    font-size: 14px;
+    color: #1a1a1a;
+    line-height: 1.4;
+}
+
+/* Upload area cursor pointer */
+.upload-area {
+    cursor: pointer;
+}
+
+.upload-area:hover {
+    border-color: #1a1a1a;
+    background: #f0f0f0;
+}
+
+/* File input hidden */
+#file-input {
+    display: none;
+}
+
+/* Responsive adjustments for new components */
+@media (max-width: 480px) {
+    .file-tabs {
+        gap: 6px;
+    }
+
+    .file-tab {
+        min-width: 70px;
+        padding: 10px 12px;
+    }
+
+    .file-tab-icon {
+        font-size: 18px;
+    }
+
+    .file-tab-name {
+        font-size: 9px;
+        max-width: 50px;
+    }
+
+    .upi-qr-code {
+        width: 160px;
+        height: 160px;
+    }
+
+    .payment-note {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .note-icon {
+        font-size: 18px;
+    }
+
+    .note-text {
+        font-size: 13px;
+    }
+}
+
+/* Print Job Status Styles */
+.print-jobs-status {
+    margin: 20px 0;
+}
+
+.job-status-item {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.job-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.job-icon {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+}
+
+.job-details {
+    flex: 1;
+}
+
+.job-name {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.job-status {
+    color: #666;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.job-error {
+    color: #ff6b6b;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.job-progress {
+    margin-top: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.qr-amount {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4CAF50;
+    margin-top: 8px;
+}
+
+.total-cost {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 8px;
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+/* Print step background adjustment for better contrast */
+
+.print-step .step-title,
+.print-step .step-subtitle {
+    color: white;
+}
+
+.print-step .section-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.print-step .job-status-item {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.print-step .job-name {
+    color: white;
+}
+
+.print-step .job-status {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.print-step .summary-row {
+    color: white;
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.print-step .payment-note {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.print-step .note-text {
+    color: white;
+}
+
+/* New Print Status Card Styles */
+.print-status-card {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 30px 0;
+    backdrop-filter: blur(10px);
+}
+
+.document-preview {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.doc-icon {
+    font-size: 48px;
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-info {
+    flex: 1;
+}
+
+.doc-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.doc-count {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+}
+
+.print-progress-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-pending,
+.status-printing,
+.status-completed,
+.status-failed {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.status-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.status-pending .status-icon {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.status-printing .status-icon {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+}
+
+.status-completed .status-icon {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.status-failed .status-icon {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.printing-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(33, 150, 243, 0.3);
+    border-top: 3px solid #2196f3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.status-text {
+    flex: 1;
+}
+
+.status-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.status-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.scan-to-pay-section {
+    margin: 40px 0;
+    text-align: center;
+}
+
+.scan-icon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+}
+
+.scan-dot {
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.scan-to-pay-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+}
+
+.scan-subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.4;
+}
+
+.start-print-btn,
+.retry-print-btn,
+.collect-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+    letter-spacing: 0.02em;
+}
+
+.start-print-btn {
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+}
+
+.start-print-btn:hover {
+    background: rgba(76, 175, 80, 1);
+    transform: translateY(-1px);
+}
+
+.retry-print-btn {
+    background: rgba(255, 152, 0, 0.9);
+    color: white;
+}
+
+.retry-print-btn:hover {
+    background: rgba(255, 152, 0, 1);
+    transform: translateY(-1px);
+}
+
+.collect-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: not-allowed;
+}
+
+.collect-btn:disabled {
+    transform: none;
+}
+
+.print-icon,
+.retry-icon,
+.collect-icon {
+    font-size: 20px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

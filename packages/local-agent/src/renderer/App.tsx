@@ -168,17 +168,37 @@ function App() {
   };
 
   const refreshPrintJobs = async () => {
-    if (!currentSession) return;
-    
     try {
-      // This would get print jobs for the current session
-      // For now, we'll use mock data
-      const mockJobs: PrintJob[] = [];
-      setPrintJobs(mockJobs);
+      // Get print jobs from the Local Agent Orchestrator
+      const jobs = await window.electronAPI.getAllPrintJobs();
+      setPrintJobs(jobs || []);
     } catch (error) {
       console.error('Failed to refresh print jobs:', error);
     }
   };
+
+  // Auto-refresh print jobs
+  useEffect(() => {
+    refreshPrintJobs();
+    const interval = setInterval(refreshPrintJobs, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Listen for WebSocket messages about new print jobs
+  useEffect(() => {
+    const handlePrintJobUpdate = (event: any) => {
+      console.log('Received print job update:', event);
+      refreshPrintJobs(); // Refresh the queue when jobs are updated
+    };
+
+    // Listen for print job updates from the main process
+    window.electronAPI.onPrintJobUpdate?.(handlePrintJobUpdate);
+
+    return () => {
+      // Cleanup listener if available
+      window.electronAPI.offPrintJobUpdate?.(handlePrintJobUpdate);
+    };
+  }, []);
 
   const addSystemError = (type: SystemError['type'], message: string, severity: SystemError['severity']) => {
     const error: SystemError = {

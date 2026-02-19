@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acchu Mobile Version Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .service-test {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 Acchu Mobile Version - Service Test</h1>
+
+        <div class="info">
+            <strong>Repository:</strong> Successfully forked and cloned from https://github.com/shaneisraeln/Acchu_mobile_version.git
+        </div>
+
+        <div class="service-test">
+            <h3>📱 Customer System (React Frontend)</h3>
+            <div id="frontend-status" class="status info">Testing connection...</div>
+            <button onclick="testFrontend()">Test Frontend (Port 3000)</button>
+            <div id="frontend-details"></div>
+        </div>
+
+        <div class="service-test">
+            <h3>🔧 Customer System API (Express Backend)</h3>
+            <div id="backend-status" class="status info">Testing connection...</div>
+            <button onclick="testBackend()">Test Backend (Port 3002)</button>
+            <div id="backend-details"></div>
+        </div>
+
+        <div class="service-test">
+            <h3>🖥️ Local Agent (Electron App)</h3>
+            <div id="electron-status" class="status info">Electron app requires build step</div>
+            <p><strong>Note:</strong> The Electron local agent needs to be built before it can run. This is the desktop application for shop PCs.</p>
+        </div>
+
+        <div class="service-test">
+            <h3>📋 Project Structure</h3>
+            <ul>
+                <li><strong>@sps/shared-types:</strong> Common TypeScript interfaces ✅ Built</li>
+                <li><strong>@sps/customer-system:</strong> React web app + Express API ✅ Running</li>
+                <li><strong>@sps/local-agent:</strong> Electron desktop app ⚠️ Needs build</li>
+            </ul>
+        </div>
+
+        <div class="service-test">
+            <h3>🔗 Service URLs</h3>
+            <ul>
+                <li><strong>Frontend:</strong> <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+                <li><strong>Backend API:</strong> <a href="http://localhost:3002" target="_blank">http://localhost:3002</a></li>
+                <li><strong>Health Check:</strong> <a href="http://localhost:3002/health" target="_blank">http://localhost:3002/health</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testFrontend() {
+            const statusDiv = document.getElementById('frontend-status');
+            const detailsDiv = document.getElementById('frontend-details');
+
+            statusDiv.textContent = 'Testing frontend connection...';
+            statusDiv.className = 'status info';
+
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    statusDiv.textContent = '✅ Frontend is running successfully!';
+                    statusDiv.className = 'status success';
+                    detailsDiv.innerHTML = '<p><strong>Status:</strong> ' + response.status + ' ' + response.statusText + '</p>';
+                } else {
+                    throw new Error('HTTP ' + response.status);
+                }
+            } catch (error) {
+                statusDiv.textContent = '❌ Frontend connection failed: ' + error.message;
+                statusDiv.className = 'status error';
+                detailsDiv.innerHTML = '<p><strong>Error:</strong> Make sure the development server is running with <code>npm run dev</code></p>';
+            }
+        }
+
+        async function testBackend() {
+            const statusDiv = document.getElementById('backend-status');
+            const detailsDiv = document.getElementById('backend-details');
+
+            statusDiv.textContent = 'Testing backend API...';
+            statusDiv.className = 'status info';
+
+            try {
+                const response = await fetch('http://localhost:3002/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.textContent = '✅ Backend API is running successfully!';
+                    statusDiv.className = 'status success';
+                    detailsDiv.innerHTML = '<p><strong>Health Check:</strong> ' + JSON.stringify(data, null, 2) + '</p>';
+                } else {
+                    throw new Error('HTTP ' + response.status);
+                }
+            } catch (error) {
+                statusDiv.textContent = '❌ Backend API connection failed: ' + error.message;
+                statusDiv.className = 'status error';
+                detailsDiv.innerHTML = '<p><strong>Error:</strong> Make sure the backend server is running on port 3002</p>';
+            }
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            setTimeout(testFrontend, 1000);
+            setTimeout(testBackend, 2000);
+        };
+    </script>
+</body>
+
+</html>

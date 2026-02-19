@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Job Confirmed - ACCHU</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f0;
+            min-height: 100vh;
+        }
+
+        .mobile-app {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: white;
+            border-bottom: 1px solid #e8e8e0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 0.02em;
+        }
+
+        .notification-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 40px;
+            background: #f5f5f0;
+            border-bottom: 1px solid #e8e8e0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .step.active,
+        .step.completed {
+            opacity: 1;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background: #22c55e;
+            color: white;
+            ground: #f5f5f0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .step-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0 0 30px 0;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .qr-frame {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .qr-container {
+            background: white;
+            border: 4px solid #1a1a1a;
+            border-radius: 0;
+            padding: 40px;
+            box-shadow: none;
+            width: 280px;
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .qr-code {
+            width: 160px;
+            height: 160px;
+            background: #f0f0f0;
+            border: 2px solid #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .qr-pattern {
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-squares {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100px;
+            height: 100px;
+        }
+
+        .qr-square {
+            background: #1a1a1a;
+            border-radius: 2px;
+        }
+
+        .qr-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            letter-spacing: 0.05em;
+        }
+
+        .scan-instruction {
+            margin: 40px 0;
+        }
+
+        .scan-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .scan-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        .scan-subtitle {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        /* UPI Payment Section */
+        .upi-payment-section {
+            background: #e8e8e8;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 40px 0 20px;
+            text-align: center;
+        }
+
+        .upi-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .upi-icon {
+            font-size: 20px;
+        }
+
+        .upi-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .upi-qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .upi-qr-code {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border: 2px solid #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .upi-qr-pattern {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upi-qr-squares {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            width: 160px;
+            height: 160px;
+        }
+
+        .upi-qr-square {
+            background: #1a1a1a;
+            border-radius: 1px;
+        }
+
+        .upi-qr-square:nth-child(odd) {
+            background: #1a1a1a;
+        }
+
+        .upi-qr-square:nth-child(even) {
+            background: transparent;
+        }
+
+        .upi-qr-square:nth-child(3n) {
+            background: #1a1a1a;
+        }
+
+        .upi-qr-square:nth-child(7n) {
+            background: transparent;
+        }
+
+        .gpay-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #1a1a1a;
+        }
+
+        .gpay-icon {
+            font-size: 16px;
+        }
+
+        .upi-id {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            font-family: monospace;
+        }
+
+        .upi-instruction {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .mobile-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #f5f5f0;
+            border-top: 1px solid #e8e8e0;
+            font-size: 12px;
+            color: #666;
+            margin-top: auto;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .session-id,
+        .version {
+            font-weight: 500;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .qr-container {
+                width: 240px;
+                height: 240px;
+                padding: 30px;
+            }
+
+            .qr-code {
+                width: 140px;
+                height: 140px;
+            }
+
+            .qr-pattern {
+                width: 120px;
+                height: 120px;
+            }
+
+            .qr-squares {
+                width: 80px;
+                height: 80px;
+            }
+
+            .upi-qr-code {
+                width: 180px;
+                height: 180px;
+            }
+
+            .upi-qr-pattern {
+                width: 160px;
+                height: 160px;
+            }
+
+            .upi-qr-squares {
+                width: 140px;
+                height: 140px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mobile-app">
+        <header class="mobile-header">
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                <span class="logo-text">ACCHU</span>
+            </div>
+            <button class="notification-btn">🔔</button>
+        </header>
+
+        <!-- Step Progress -->
+        <div class="step-progress">
+            <div class="step completed">
+                <span class="step-number">01</span>
+                <span class="step-label">UPLOAD</span>
+            </div>
+            <div class="step completed">
+                <span class="step-number">02</span>
+                <span class="step-label">CONFIG</span>
+            </div>
+            <div class="step active">
+                <span class="step-number">03</span>
+                <span class="step-label">PRINT</span>
+            </div>
+        </div>
+
+        <main class="mobile-main">
+            <div class="print-step">
+                <h1 class="step-title">PRINT JOB<br />CONFIRMED</h1>
+
+                <div class="qr-frame">
+                    <div class="qr-container">
+                        <div class="qr-placeholder">
+                            <div class="qr-code">
+                                <!-- QR Code for kiosk scanning -->
+                                <div class="qr-pattern">
+                                    <div class="qr-squares">
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                        <div class="qr-square"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="qr-label">PRINT JOB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scan-instruction">
+                    <div class="scan-icon">📱</div>
+                    <div class="scan-text">READY TO SCAN</div>
+                    <p class="scan-subtitle">
+                        Present this code at the kiosk<br />
+                        scanner to release your document.
+                    </p>
+                </div>
+
+                <!-- GPay UPI QR Code Section -->
+                <div class="upi-payment-section">
+                    <div class="upi-header">
+                        <div class="upi-icon">📎</div>
+                        <div class="upi-name">Aneesh Nikam</div>
+                    </div>
+
+                    <div class="upi-qr-container">
+                        <div class="upi-qr-code">
+                            <!-- GPay UPI QR Code Pattern -->
+                            <div class="upi-qr-pattern">
+                                <div class="upi-qr-squares">
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                    <div class="upi-qr-square"></div>
+                                </div>
+                                <div class="gpay-logo">
+                                    <div class="gpay-icon">💳</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="upi-id">UPI ID: aneeshnikam014@okaxis</div>
+                        <div class="upi-instruction">Scan to pay with any UPI app</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mobile-footer">
+            <div class="system-status">
+                <div class="status-dot"></div>
+                <span>SYSTEM OPERATIONAL</span>
+            </div>
+            <div class="session-id">ID: #8823</div>
+        </footer>
+    </div>
+</body>
+
+</html>

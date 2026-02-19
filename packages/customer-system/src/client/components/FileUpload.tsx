@@ -141,56 +141,43 @@ export default function FileUpload({
           )
         );
 
-        const formData = new FormData();
-        formData.append('file', fileWithOptions.file);
-        formData.append('printOptions', JSON.stringify(fileWithOptions.printOptions));
-
-        const xhr = new XMLHttpRequest();
-        
-        await new Promise<void>((resolve, reject) => {
-          xhr.upload.addEventListener('progress', (event) => {
-            if (event.lengthComputable) {
-              const progress = Math.round((event.loaded / event.total) * 100);
+        // Mock upload for demo - no API calls
+        await new Promise<void>((resolve) => {
+          // Simulate upload progress
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 20;
+            setSelectedFiles(prev => 
+              prev.map(f => 
+                f.id === fileWithOptions.id ? { ...f, progress } : f
+              )
+            );
+            
+            if (progress >= 100) {
+              clearInterval(interval);
+              
+              // Create mock metadata
+              const metadata: FileMetadata = {
+                id: fileWithOptions.id,
+                originalName: fileWithOptions.file.name,
+                mimeType: fileWithOptions.file.type,
+                size: fileWithOptions.file.size,
+                uploadedAt: new Date(),
+                localPath: `/tmp/sessions/${sessionId}/${fileWithOptions.file.name}`,
+                pageCount: fileWithOptions.file.type === 'application/pdf' ? Math.floor(Math.random() * 10) + 1 : 1
+              };
+              
               setSelectedFiles(prev => 
                 prev.map(f => 
-                  f.id === fileWithOptions.id ? { ...f, progress } : f
+                  f.id === fileWithOptions.id 
+                    ? { ...f, status: 'completed', progress: 100, metadata }
+                    : f
                 )
               );
+              uploadedMetadata.push(metadata);
+              resolve();
             }
-          });
-
-          xhr.addEventListener('load', () => {
-            if (xhr.status === 200) {
-              try {
-                const response: ApiResponse<UploadResult> = JSON.parse(xhr.responseText);
-                if (response.success && response.data) {
-                  const metadata = response.data.metadata;
-                  setSelectedFiles(prev => 
-                    prev.map(f => 
-                      f.id === fileWithOptions.id 
-                        ? { ...f, status: 'completed', progress: 100, metadata }
-                        : f
-                    )
-                  );
-                  uploadedMetadata.push(metadata);
-                  resolve();
-                } else {
-                  throw new Error(response.error || 'Upload failed');
-                }
-              } catch (parseError) {
-                throw new Error('Invalid server response');
-              }
-            } else {
-              throw new Error(`Upload failed with status ${xhr.status}`);
-            }
-          });
-
-          xhr.addEventListener('error', () => {
-            reject(new Error('Network error during upload'));
-          });
-
-          xhr.open('POST', `/api/sessions/${sessionId}/upload`);
-          xhr.send(formData);
+          }, 200);
         });
 
       } catch (error) {

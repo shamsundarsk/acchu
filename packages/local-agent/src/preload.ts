@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   queuePrintJob: (sessionId: string, options: any) => ipcRenderer.invoke('print:queue-job', sessionId, options),
   executePrintJob: (jobId: string) => ipcRenderer.invoke('print:execute-job', jobId),
   getPrinterStatus: () => ipcRenderer.invoke('print:get-status'),
+  getAllPrintJobs: () => ipcRenderer.invoke('print:get-all-jobs'),
+  getPrintProgress: (jobId: string) => ipcRenderer.invoke('print:get-progress', jobId),
 
   // Configuration management
   getConfiguration: () => ipcRenderer.invoke('config:get'),
@@ -61,6 +63,8 @@ declare global {
       queuePrintJob: (sessionId: string, options: any) => Promise<any>;
       executePrintJob: (jobId: string) => Promise<any>;
       getPrinterStatus: () => Promise<any>;
+      getAllPrintJobs: () => Promise<any>;
+      getPrintProgress: (jobId: string) => Promise<any>;
       
       // Configuration management
       getConfiguration: () => Promise<any>;

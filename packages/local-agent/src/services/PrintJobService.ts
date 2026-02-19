@@ -263,16 +263,24 @@ export class PrintJobService {
    * Get print job status and progress
    * Requirements: 6.3 - Print progress monitoring
    */
-  getPrintJobStatus(jobId: JobId): PrintJobStatusUpdate | null {
+  getPrintJobStatus(sessionId: SessionId, jobId: JobId): PrintJobStatusUpdate {
     try {
       const progress = this.printManager.getPrintProgress(jobId);
       if (!progress) {
-        return null;
+        return {
+          jobId,
+          sessionId,
+          status: JobStatus.FAILED,
+          progress: 0,
+          message: 'Print job not found',
+          error: 'Job not found in queue',
+          timestamp: new Date()
+        };
       }
 
       return {
         jobId: progress.jobId,
-        sessionId: '', // Will be filled by caller if needed
+        sessionId,
         status: progress.status,
         progress: progress.progress,
         message: progress.message,
@@ -281,7 +289,15 @@ export class PrintJobService {
       };
     } catch (error) {
       console.error('Error getting print job status:', error);
-      return null;
+      return {
+        jobId,
+        sessionId,
+        status: JobStatus.FAILED,
+        progress: 0,
+        message: 'Error getting status',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date()
+      };
     }
   }
 

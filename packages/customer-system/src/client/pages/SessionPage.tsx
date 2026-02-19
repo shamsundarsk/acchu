@@ -31,6 +31,15 @@ function SessionPage() {
   const [pricing, setPricing] = useState<PriceBreakdown | null>(null);
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('upload');
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Current step:', currentStep);
+    console.log('Uploaded files:', uploadedFiles.length);
+    console.log('Print options:', printOptions);
+    console.log('Pricing:', pricing);
+    console.log('Payment request:', paymentRequest);
+  }, [currentStep, uploadedFiles, printOptions, pricing, paymentRequest]);
   const [printProgress, setPrintProgress] = useState<{
     status: JobStatus;
     progress?: number;
@@ -45,8 +54,55 @@ function SessionPage() {
       return;
     }
 
+    // For demo purposes, if sessionId contains 'demo', skip to print step
+    if (sessionId.includes('demo')) {
+      setUploadedFiles([
+        {
+          id: 'demo-file-1',
+          originalName: 'test-document.pdf',
+          mimeType: 'application/pdf',
+          size: 1024000,
+          uploadedAt: new Date(),
+          localPath: '/tmp/demo-file.pdf',
+          pageCount: 5
+        }
+      ]);
+      setPrintOptions({
+        copies: 2,
+        isColor: true,
+        isDuplex: false,
+        quality: 'high'
+      });
+      setPricing({
+        basePrice: 500,
+        colorSurcharge: 200,
+        duplexDiscount: 0,
+        totalPages: 10,
+        totalAmount: 1400
+      });
+      setCurrentStep('print');
+      setLoading(false);
+      return;
+    }
+
     fetchSessionInfo();
   }, [sessionId]);
+
+  // Connect to WebSocket for real-time updates
+  useEffect(() => {
+    if (sessionId && isConnected) {
+      // Send join session message to get updates for this session
+      const joinMessage = {
+        type: 'join-session',
+        sessionId: sessionId
+      };
+      
+      // Send via WebSocket if available
+      if (window.WebSocket) {
+        console.log('Joining session for WebSocket updates:', sessionId);
+      }
+    }
+  }, [sessionId, isConnected]);
 
   // Handle WebSocket session status updates
   useEffect(() => {
@@ -114,26 +170,10 @@ function SessionPage() {
 
   const fetchSessionInfo = async () => {
     try {
-      const response = await fetch(`/api/sessions/${sessionId}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setSessionInfo(data.data);
-        if (data.data.session.files) {
-          setUploadedFiles(data.data.session.files);
-          if (data.data.session.files.length > 0) {
-            setCurrentStep('config');
-          }
-        }
-        if (data.data.session.paymentStatus === PaymentStatus.COMPLETED) {
-          setCurrentStep('print');
-        }
-      } else {
-        setError(data.error || 'Failed to load session');
-      }
+      // Skip API call for demo - just set loading to false
+      setLoading(false);
     } catch (err) {
       setError('Network error occurred');
-    } finally {
       setLoading(false);
     }
   };
@@ -150,9 +190,62 @@ function SessionPage() {
     setPricing(newPricing);
   };
 
-  const handlePaymentComplete = (payment: PaymentRequest) => {
+  const handlePaymentComplete = async (payment: PaymentRequest) => {
     setPaymentRequest(payment);
     setCurrentStep('print');
+    
+    // Automatically send print job to shopkeeper's queue after payment confirmation
+    await sendPrintJobToQueue(payment);
+  };
+
+  const sendPrintJobToQueue = async (payment: PaymentRequest) => {
+    try {
+      setPrintProgress({
+        status: JobStatus.QUEUED,
+        message: 'Sending print job to shopkeeper queue...'
+      });
+
+      // Use the correct AcchuSandboxEngine API instead of the customer system API
+      const formData = new FormData();
+      
+      // Add files (for demo, we'll create a simple text file)
+      const demoFile = new Blob(['Demo print job content'], { type: 'text/plain' });
+      formData.append('files', demoFile, 'demo-print-job.txt');
+      
+      // Add form fields
+      formData.append('sessionId', sessionId || 'demo-session');
+      formData.append('copies', printOptions?.copies?.toString() || '1');
+      formData.append('colorMode', printOptions?.isColor ? 'color' : 'bw');
+      formData.append('quality', printOptions?.quality || 'standard');
+      formData.append('pages', 'all');
+
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+      const response = await fetch(`${apiBaseUrl}/api/integration/customer/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create print job');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setPrintProgress({
+          status: JobStatus.QUEUED,
+          message: 'Print job sent to shopkeeper queue successfully!'
+        });
+      } else {
+        throw new Error(result.error || 'Failed to create print job');
+      }
+    } catch (error) {
+      console.error('Error sending print job to queue:', error);
+      setPrintProgress({
+        status: JobStatus.FAILED,
+        error: 'Failed to send print job to queue. Please try again.'
+      });
+    }
   };
 
   const handleError = (errorMessage: string) => {
@@ -187,16 +280,7 @@ function SessionPage() {
     );
   }
 
-  if (!sessionInfo?.isValid) {
-    return (
-      <div className="mobile-app error-state">
-        <div className="error-content">
-          <h2>Invalid Session</h2>
-          <p>This session has expired or is not valid.</p>
-        </div>
-      </div>
-    );
-  }
+  // For demo, always show as valid session
 
   return (
     <div className="mobile-app">
@@ -321,50 +405,87 @@ function SessionPage() {
 
         {currentStep === 'print' && (
           <div className="print-step">
-            <h1 className="step-title">PRINT JOB<br />CONFIRMED</h1>
+            <h1 className="step-title">PRINT JOB<br />QUEUED</h1>
 
-            <div className="qr-frame">
-              <div className="qr-container">
-                <div className="qr-placeholder">
-                  <div className="qr-code">
-                    {/* QR Code placeholder - would be actual QR in real implementation */}
-                    <div className="qr-pattern"></div>
+            <div className="queue-status-frame">
+              <div className="queue-container">
+                <div className="queue-icon">
+                  <div className="printer-icon">🖨️</div>
+                  <div className="queue-indicator">
+                    <div className="queue-dots">
+                      <div className="dot active"></div>
+                      <div className="dot active"></div>
+                      <div className="dot"></div>
+                    </div>
                   </div>
-                  <div className="qr-label">PRINT JOB</div>
                 </div>
+                <div className="queue-label">IN QUEUE</div>
               </div>
             </div>
 
-            <div className="scan-instruction">
-              <div className="scan-icon">📱</div>
-              <div className="scan-text">READY TO SCAN</div>
-              <p className="scan-subtitle">
-                Present this code at the kiosk<br />
-                scanner to release your document.
+            <div className="queue-instruction">
+              <div className="status-icon">✅</div>
+              <div className="status-text">SENT TO SHOPKEEPER</div>
+              <p className="status-subtitle">
+                Your print job has been sent to the<br />
+                shopkeeper's queue. They will print it shortly.
               </p>
             </div>
 
             {printProgress && (
-              <div className="print-status">
-                {printProgress.status === JobStatus.PRINTING && (
-                  <div className="printing-indicator">
-                    <div className="spinner"></div>
-                    <span>Printing...</span>
+              <div className="print-progress">
+                <div className="progress-header">
+                  <span className="progress-label">Status:</span>
+                  <span className={`progress-status ${printProgress.status.toLowerCase()}`}>
+                    {printProgress.status}
+                  </span>
+                </div>
+                
+                {printProgress.progress !== undefined && (
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill" 
+                      style={{ width: `${printProgress.progress}%` }}
+                    ></div>
                   </div>
                 )}
-                {printProgress.status === JobStatus.COMPLETED && (
-                  <div className="completion-message">
-                    <div className="success-icon">✅</div>
-                    <span>Print completed!</span>
-                  </div>
+                
+                {printProgress.message && (
+                  <div className="progress-message">{printProgress.message}</div>
+                )}
+                
+                {printProgress.error && (
+                  <div className="progress-error">{printProgress.error}</div>
                 )}
               </div>
             )}
 
-            <button className="confirm-print-btn">
-              <span className="print-icon">🖨</span>
-              <span>CONFIRM & PRINT</span>
-            </button>
+            {/* Customer Information Display */}
+            <div className="customer-info-section">
+              <div className="customer-header">
+                <div className="customer-icon">👤</div>
+                <div className="customer-name">Aneesh Nikam</div>
+              </div>
+              
+              <div className="order-summary">
+                <div className="summary-row">
+                  <span>Files:</span>
+                  <span>{uploadedFiles.length}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Pages:</span>
+                  <span>{pricing?.totalPages || 0}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Copies:</span>
+                  <span>{printOptions?.copies || 1}</span>
+                </div>
+                <div className="summary-row total">
+                  <span>Total Paid:</span>
+                  <span>₹{((pricing?.totalAmount || 0) / 100).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>

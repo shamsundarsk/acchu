@@ -19,6 +19,7 @@ export interface Session {
   expiresAt: Date;
   files: FileMetadata[];
   printJob?: PrintJob;
+  printJobs?: PrintJob[]; // Array to store multiple print jobs
   paymentStatus: PaymentStatus;
 }
 

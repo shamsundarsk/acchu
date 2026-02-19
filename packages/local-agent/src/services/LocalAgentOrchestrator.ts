@@ -97,7 +97,20 @@ export class LocalAgentOrchestrator {
       auditLogger: this.auditLogger
     });
     
-    this.printManager = new PrintManager(config.printManager);
+    // Configure sandbox settings for PrintManager
+    const printManagerConfig: PrintManagerConfig = {
+      ...config.printManager,
+      sandbox: {
+        sandboxEngineExecutable: path.join(process.cwd(), 'src/AcchuSandboxEngine/publish/AcchuSandboxEngine.exe'),
+        sandboxBaseDirectory: path.join(process.cwd(), 'temp/sandboxes'),
+        maxConcurrentSandboxes: 3,
+        sandboxTimeoutMs: 300000, // 5 minutes
+        enableLogging: true
+      },
+      enableSandboxMode: true
+    };
+    
+    this.printManager = new PrintManager(printManagerConfig, this.auditLogger);
     this.fileHandler = new FileHandler();
     
     // Initialize cleanup orchestrator

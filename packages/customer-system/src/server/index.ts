@@ -63,10 +63,22 @@ wss.on('connection', (ws: ExtendedWebSocket, request) => {
           broadcastToSession(data.sessionId, {
             type: 'print-status-update',
             jobId: data.jobId,
-            status: data.data.status,
-            progress: data.data.progress,
-            message: data.data.message,
-            error: data.data.error,
+            data: {
+              status: data.data.status,
+              progress: data.data.progress,
+              message: data.data.message,
+              error: data.data.error
+            },
+            timestamp: data.timestamp
+          });
+          break;
+          
+        case 'print-job-created':
+          // Forward print job creation confirmation to session clients
+          broadcastToSession(data.sessionId, {
+            type: 'print-job-created',
+            jobId: data.jobId,
+            data: data.data,
             timestamp: data.timestamp
           });
           break;
