@@ -21,7 +21,33 @@ export function setWebSocketServer(webSocketServer: any) {
   wss = webSocketServer;
 }
 
-// Apply session validation middleware to all routes except demo routes
+/**
+ * Get pending print jobs for Electron app (HTTP polling)
+ * This endpoint is public (no session validation) for the Electron app
+ */
+router.get('/pending', async (req, res) => {
+  try {
+    // TODO: Get actual pending jobs from database/storage
+    // For now, return empty array
+    // In production, you'd query your database for jobs with status 'pending' or 'queued'
+    
+    const response: ApiResponse = {
+      success: true,
+      jobs: [], // Will be populated with actual jobs from database
+      message: 'Pending jobs retrieved'
+    };
+
+    res.json(response);
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get pending jobs'
+    };
+    res.status(500).json(response);
+  }
+});
+
+// Apply session validation middleware to all routes except demo routes and /pending
 router.use('/:sessionId/*', (req, res, next) => {
   // Skip validation for demo sessions
   if (req.params.sessionId?.startsWith('demo-') || req.params.sessionId?.startsWith('test-')) {
@@ -660,29 +686,3 @@ router.get('/test/:sessionId/pending', async (req: SessionRequest, res) => {
 });
 
 export { router as printJobRoutes };
-
-/**
- * Get pending print jobs for Electron app (HTTP polling)
- * This replaces WebSocket for Vercel compatibility
- */
-router.get('/pending', async (req, res) => {
-  try {
-    // TODO: Get actual pending jobs from database/storage
-    // For now, return empty array
-    // In production, you'd query your database for jobs with status 'pending' or 'queued'
-    
-    const response: ApiResponse = {
-      success: true,
-      jobs: [], // Will be populated with actual jobs from database
-      message: 'Pending jobs retrieved'
-    };
-
-    res.json(response);
-  } catch (error) {
-    const response: ApiResponse = {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to get pending jobs'
-    };
-    res.status(500).json(response);
-  }
-});
