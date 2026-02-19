@@ -29,6 +29,25 @@ app.use(express.static('dist/client'));
 // Set WebSocket server for print job routes
 setWebSocketServer(wss);
 
+// Public endpoint for Electron app polling (must be before other routes)
+app.get('/api/print-jobs/pending', async (req, res) => {
+  try {
+    // TODO: Get actual pending jobs from database/storage
+    // For now, return empty array
+    const response = {
+      success: true,
+      jobs: [],
+      message: 'Pending jobs retrieved'
+    };
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get pending jobs'
+    });
+  }
+});
+
 // Routes
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/files', fileRoutes);
