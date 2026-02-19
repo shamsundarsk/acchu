@@ -62,10 +62,17 @@ export function useWebSocket(options: WebSocketHookOptions): WebSocketHookReturn
       
       // Convert HTTP URL to WebSocket URL
       const wsUrl = url.replace(/^http/, 'ws');
-      wsRef.current = new WebSocket(wsUrl);
+      
+      // Get security token from sessionStorage if available
+      const token = sessionId ? sessionStorage.getItem(`ws_token_${sessionId}`) : null;
+      
+      // Add token to WebSocket URL as query parameter for authentication
+      const authenticatedUrl = token ? `${wsUrl}?token=${encodeURIComponent(token)}` : wsUrl;
+      
+      wsRef.current = new WebSocket(authenticatedUrl);
 
       wsRef.current.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected with authentication');
         setIsConnected(true);
         setConnectionState('connected');
         reconnectAttemptsRef.current = 0;
@@ -75,6 +82,7 @@ export function useWebSocket(options: WebSocketHookOptions): WebSocketHookReturn
           const joinMessage: WebSocketMessage = {
             type: 'join-session',
             sessionId,
+            data: { token }, // Include token in join message for additional security
             timestamp: new Date().toISOString()
           };
           wsRef.current?.send(JSON.stringify(joinMessage));

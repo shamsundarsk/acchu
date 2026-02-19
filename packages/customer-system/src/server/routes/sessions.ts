@@ -1,10 +1,43 @@
 import { Router } from 'express';
 import { SessionId, SessionInfo, ApiResponse, SessionStatus, PaymentStatus } from '../types';
 import { validateSessionAccess, cleanupSessionConnection, SessionRequest } from '../middleware/sessionValidation';
+import crypto from 'crypto';
 
 const router = Router();
 
-// Apply session validation middleware to all routes
+/**
+ * Create a new session
+ * Requirements: 2.1 - Session creation with security token
+ */
+router.post('/', async (req, res) => {
+  try {
+    // Generate unique session ID
+    const sessionId = `session_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    
+    // Generate security token for WebSocket authentication
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // TODO: Register session with Local Agent
+    console.log(`Creating new session: ${sessionId}`);
+    
+    const response: ApiResponse = {
+      success: true,
+      sessionId,
+      token, // Return token for WebSocket authentication
+      message: 'Session created successfully',
+    };
+
+    res.status(201).json(response);
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create session',
+    };
+    res.status(500).json(response);
+  }
+});
+
+// Apply session validation middleware to routes that need it
 router.use('/:sessionId', validateSessionAccess, cleanupSessionConnection);
 
 /**

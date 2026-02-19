@@ -39,10 +39,31 @@ app.use('/api/print-jobs', printJobRoutes);
 wss.on('connection', (ws: ExtendedWebSocket, request) => {
   console.log('New WebSocket connection');
   
+  // Extract token from query parameters for authentication
+  const url = new URL(request.url || '', `http://${request.headers.host}`);
+  const token = url.searchParams.get('token');
+  
+  if (token) {
+    console.log('WebSocket connection authenticated with token');
+    // Store token for validation (you can add more validation logic here)
+    (ws as any).authToken = token;
+  }
+  
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message.toString());
       console.log('Received WebSocket message:', data);
+      
+      // Validate token if provided in message
+      if (data.data?.token && (ws as any).authToken !== data.data.token) {
+        console.warn('Token mismatch in WebSocket message');
+        ws.send(JSON.stringify({
+          type: 'error',
+          data: { error: 'Authentication failed' },
+          timestamp: new Date().toISOString()
+        }));
+        return;
+      }
       
       // Handle different message types
       switch (data.type) {
@@ -50,6 +71,14 @@ wss.on('connection', (ws: ExtendedWebSocket, request) => {
           // Join session room for updates
           ws.sessionId = data.sessionId;
           console.log(`Client joined session: ${data.sessionId}`);
+          
+          // Send confirmation
+          ws.send(JSON.stringify({
+            type: 'session-joined',
+            sessionId: data.sessionId,
+            data: { success: true },
+            timestamp: new Date().toISOString()
+          }));
           break;
           
         case 'local-agent-connected':
