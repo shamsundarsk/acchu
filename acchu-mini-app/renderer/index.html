@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCHU Print Shop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-icon">🖨️</div>
+                <span class="logo-text">ACCHU Print Shop</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-qr" onclick="showQRCode()">
+                    <span>📱</span>
+                    <span>Show QR Code</span>
+                </button>
+                <div class="connection-status">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="connectionText">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Printer Status -->
+            <div class="card printer-status-card">
+                <div class="printer-icon">🖨️</div>
+                <div class="printer-info">
+                    <h3 id="printerName">Default Printer</h3>
+                    <p id="printerStatus" class="status-ready">Ready</p>
+                </div>
+            </div>
+
+            <!-- Print Queue -->
+            <div class="card print-queue-card">
+                <div class="queue-header">
+                    <h2>Print Queue</h2>
+                    <span class="queue-count" id="queueCount">0 jobs</span>
+                </div>
+                
+                <div id="printQueue" class="print-queue">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No pending print jobs</p>
+                        <small>Jobs will appear here when customers upload files</small>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>ACCHU Print Shop v1.0.0</span>
+            <span id="timestamp">--:--:--</span>
+        </footer>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Customer Access QR Code</h2>
+                <button class="modal-close" onclick="closeQRModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-container">
+                    <img id="qrCodeImage" src="" alt="QR Code" />
+                </div>
+                <div class="qr-info">
+                    <p class="qr-instruction">Customers can scan this QR code to access the print interface</p>
+                    <div class="url-display">
+                        <span class="url-label">URL:</span>
+                        <span id="customerUrl" class="url-text">Loading...</span>
+                    </div>
+                    <button class="btn-copy" onclick="copyURL()">
+                        <span>📋</span>
+                        <span>Copy URL</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

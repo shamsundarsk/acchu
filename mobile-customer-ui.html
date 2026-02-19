@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCHU - Customer Upload</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .config-section {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .config-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .file-list {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">ACCHU</div>
+        <div class="subtitle">Upload & Print Service</div>
+
+        <div id="upload-step" class="step active">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <p>Click to upload files</p>
+                <p style="font-size: 0.9rem; color: #999;">PDF, DOC, DOCX, JPG, PNG</p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
+            <div id="fileList" class="file-list"></div>
+        </div>
+
+        <div id="config-step" class="step">
+            <h3>Print Settings</h3>
+            <div class="config-section">
+                <div class="config-group">
+                    <label for="copies">Copies:</label>
+                    <select id="copies">
+                        <option value="1">1 Copy</option>
+                        <option value="2">2 Copies</option>
+                        <option value="3">3 Copies</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="colorMode">Color:</label>
+                    <select id="colorMode">
+                        <option value="bw">Black & White</option>
+                        <option value="color">Color</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="duplex">Sides:</label>
+                    <select id="duplex">
+                        <option value="false">Single-sided</option>
+                        <option value="true">Double-sided</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="submitPrintJob()">Send to Print Queue</button>
+        </div>
+
+        <div id="loading-step" class="step">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Sending to print queue...</span>
+            </div>
+        </div>
+
+        <div id="success-step" class="step">
+            <div class="success-message">✅ Files sent successfully!</div>
+            <p>Your files are now in the shopkeeper's print queue.</p>
+            <button class="btn" onclick="resetForm()">Upload More Files</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        const sessionId = 'customer-session-' + Date.now();
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFiles = Array.from(e.target.files);
+            updateFileList();
+            if (selectedFiles.length > 0) showStep('config-step');
+        });
+
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `
+                    <div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button onclick="removeFile(${index})" style="background:none;border:none;color:#dc3545;cursor:pointer;">✕</button>
+                `;
+                fileList.appendChild(div);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            if (selectedFiles.length === 0) showStep('upload-step');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        async function submitPrintJob() {
+            if (selectedFiles.length === 0) {
+                alert('Please select files to upload');
+                return;
+            }
+
+            showStep('loading-step');
+
+            try {
+                const formData = new FormData();
+                selectedFiles.forEach(file => formData.append('files', file));
+
+                const printPreferences = {
+                    copies: parseInt(document.getElementById('copies').value),
+                    colorMode: document.getElementById('colorMode').value,
+                    duplex: document.getElementById('duplex').value === 'true'
+                };
+                formData.append('printPreferences', JSON.stringify(printPreferences));
+                formData.append('sessionId', sessionId);
+
+                const response = await fetch('http://localhost:8080/api/integration/customer/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStep('success-step');
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Failed to upload files. Please try again.');
+                showStep('config-step');
+            }
+        }
+
+        function resetForm() {
+            selectedFiles = [];
+            document.getElementById('fileInput').value = '';
+            updateFileList();
+            showStep('upload-step');
+        }
+    </script>
+</body>
+
+</html>

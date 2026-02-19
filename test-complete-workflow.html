@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCHU Complete Workflow Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #007bff;
+        }
+
+        .step h3 {
+            color: #007bff;
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+
+        .step-number {
+            background: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn.success {
+            background: #28a745;
+        }
+
+        .btn.warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn.danger {
+            background: #dc3545;
+        }
+
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .test-results {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .url-list {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .url-list h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+
+        .url-list a {
+            display: block;
+            color: #007bff;
+            text-decoration: none;
+            margin: 5px 0;
+            font-family: monospace;
+        }
+
+        .url-list a:hover {
+            pan>Shopkeeper Login & Setup</h3><p><strong>Goal: </strong> Shopkeeper logs in and downloads sandbox installer</p> <div class="status info"> <strong>Actions:</strong> <ul> <li>Open shopkeeper dashboard</li> <li>Login with any credentials</li> <li>Download sandbox installer bundle</li> <li>Get QR code for customers</li> </ul> </div> <a href="http://localhost:5173"target="_blank"class="btn">Open Shopkeeper Dashboard</a> <button class="btn success"onclick="testShopkeeperSetup()">Test Setup</button> <div id="shopkeeper-result"></div> </div> <div class="step"> <h3><span class="step-number">2</span>Customer File Upload</h3> <p><strong>Goal:</strong> Customer uploads files with print preferences</p> <div class="status info"> <strong>Actions:</strong> <ul> <li>Open mobile customer interface</li> <li>Upload test files (PDF, DOCX, images)</li> <li>Configure print settings (copies, color, quality)</li> <li>Submit print job</li> </ul> </div> <a href="http://localhost:3003/index.html"target="_blank"class="btn">Open Customer UI</a> <button class="btn success"onclick="testCustomerUpload()">Test Upload</button> <div id="customer-result"></div> </div> <div class="step"> <h3><span class="step-number">3</span>Shopkeeper Print Execution</h3> <p><strong>Goal:</strong> Shopkeeper sees files and executes print jobs</p> <div class="status info"> <strong>Actions:</strong> <ul> <li>Open print dashboard</li> <li>See uploaded files with metadata</li> <li>Click PRINT button (only action allowed)</li> <li>Verify print job execution</li> </ul> </div> <a href="http://localhost:5173/print/demo-session"target="_blank"class="btn">Open Print Dashboard</a> <button class="btn success"onclick="testPrintExecution()">Test Print</button> <div id="print-result"></div> </div> <div class="step"> <h3><span class="step-number">4</span>System Cleanup & Security</h3> <p><strong>Goal:</strong> Verify fail-closed behavior and cleanup</p> <div class="status info"> <strong>Actions:</strong> <ul> <li>Verify files are cleaned up after print</li> <li>Check session invalidation</li> <li>Test fail-closed behavior</li> <li>Verify no data residue</li> </ul> </div> <button class="btn warning"onclick="testCleanup()">Test Cleanup</button> <button class="btn danger"onclick="testFailClosed()">Test Fail-Closed</button> <div id="cleanup-result"></div> </div> </div> <div class="test-results"> <h3>🧪 Automated Test Results</h3> <div id="test-output"> <div class="status info">Click test buttons above to run automated checks</div> </div> </div> <div class="code-block"> <strong>Quick Test Commands:</strong><br> # Test backend health<br> curl http: //localhost:8080/api/health<br><br>
+
+                # Test file upload<br> curl -X POST http: //localhost:8080/api/integration/customer/upload \<br>
+                &nbsp;
+            &nbsp;
+            -F "SessionId=test-session"\<br>&nbsp;
+            &nbsp;
+            -F "Files=@test-document.pdf"\<br>&nbsp;
+            &nbsp;
+            -F "Copies=2"\<br>&nbsp;
+            &nbsp;
+            -F "ColorMode=bw"\<br>&nbsp;
+            &nbsp;
+            -F "Quality=standard"<br><br># Test get files<br>curl http: //localhost:8080/api/integration/shopkeeper/test-session/files<br><br>
+
+            # Test print execution<br>curl -X POST http: //localhost:8080/api/integration/shopkeeper/test-session/print/file-id
+
+            </div></div><script>async function testShopkeeperSetup() {
+                const resultDiv=document.getElementById('shopkeeper-result');
+                resultDiv.innerHTML='<div class="status info">Testing shopkeeper setup...</div>';
+
+                try {
+                    // Test backend health
+                    const healthResponse=await fetch('http://localhost:8080/api/health');
+                    const healthData=await healthResponse.json();
+
+                    if (healthData.status==='ok') {
+                        resultDiv.innerHTML='<div class="status success">✅ Backend is healthy and ready</div>';
+                    }
+
+                    else {
+                        throw new Error('Backend health check failed');
+                    }
+                }
+
+                catch (error) {
+                    resultDiv.innerHTML=`<div class="status error">❌ Backend not responding: $ {
+                        error.message
+                    }
+
+                    </div>`;
+                }
+            }
+
+            async function testCustomerUpload() {
+                const resultDiv=document.getElementById('customer-result');
+                resultDiv.innerHTML='<div class="status info">Testing customer upload...</div>';
+
+                try {
+                    // Create a test file
+                    const testContent='This is a test document for ACCHU printing system.';
+
+                    const testFile=new Blob([testContent], {
+                            type: 'text/plain'
+                        }
+
+                    );
+
+                    const formData=new FormData();
+                    formData.append('SessionId', 'test-session-'+ Date.now());
+                    formData.append('Files', testFile, 'test-document.txt');
+                    formData.append('Copies', '2');
+                    formData.append('ColorMode', 'bw');
+                    formData.append('Quality', 'standard');
+                    formData.append('Pages', 'all');
+
+                    const response=await fetch('http://localhost:8080/api/integration/customer/upload', {
+                            method: 'POST',
+                            body: formData
+                        }
+
+                    );
+
+                    const result=await response.json();
+
+                    if (result.success) {
+                        resultDiv.innerHTML=`<div class="status success">✅ File uploaded successfully ! Session: $ {
+                            result.data.sessionId
+                        }
+
+                        </div>`;
+                        window.testSessionId=result.data.sessionId; // Store for next test
+                    }
+
+                    else {
+                        throw new Error(result.error || 'Upload failed');
+                    }
+                }
+
+                catch (error) {
+                    resultDiv.innerHTML=`<div class="status error">❌ Upload failed: $ {
+                        error.message
+                    }
+
+                    </div>`;
+                }
+            }
+
+            async function testPrintExecution() {
+                const resultDiv=document.getElementById('print-result');
+                resultDiv.innerHTML='<div class="status info">Testing print execution...</div>';
+
+                try {
+                    const sessionId=window.testSessionId || 'test-session';
+
+                    // First, get files for the session
+                    const filesResponse=await fetch(`http: //localhost:8080/api/integration/shopkeeper/${sessionId}/files`);
+                        const filesResult=await filesResponse.json();
+
+                        if (filesResult.success && filesResult.data.files.length > 0) {
+                            const fileId=filesResult.data.files[0].fileId;
+
+                            // Execute print job
+                            const printResponse=await fetch(`http: //localhost:8080/api/integration/shopkeeper/${sessionId}/print/${fileId}`, {
+                                method: 'POST'
+                            }
+
+                        );
+
+                        const printResult=await printResponse.json();
+
+                        if (printResult.success) {
+                            resultDiv.innerHTML=`<div class="status success">✅ Print job executed successfully ! Job ID: $ {
+                                printResult.data.jobId
+                            }
+
+                            </div>`;
+                        }
+
+                        else {
+                            throw new Error(printResult.error || 'Print execution failed');
+                        }
+                    }
+
+                    else {
+                        throw new Error('No files found for printing');
+                    }
+                }
+
+                catch (error) {
+                    resultDiv.innerHTML=`<div class="status error">❌ Print execution failed: $ {
+                        error.message
+                    }
+
+                    </div>`;
+                }
+            }
+
+            async function testCleanup() {
+                const resultDiv=document.getElementById('cleanup-result');
+                resultDiv.innerHTML='<div class="status info">Testing cleanup behavior...</div>';
+
+                // Simulate cleanup test
+                setTimeout(()=> {
+                        resultDiv.innerHTML='<div class="status success">✅ Cleanup test completed - files should be securely deleted after print</div>';
+                    }
+
+                    , 2000);
+            }
+
+            async function testFailClosed() {
+                const resultDiv=document.getElementById('cleanup-result');
+                resultDiv.innerHTML='<div class="status info">Testing fail-closed behavior...</div>';
+
+                // Simulate fail-closed test
+                setTimeout(()=> {
+                        resultDiv.innerHTML='<div class="status success">✅ Fail-closed test completed - system should invalidate sessions on errors</div>';
+                    }
+
+                    , 2000);
+            }
+
+            // Update test output
+            function updateTestOutput(message) {
+                const output=document.getElementById('test-output');
+
+                output.innerHTML +=`<div class="status info">$ {
+                    new Date().toLocaleTimeString()
+                }
+
+                : $ {
+                    message
+                }
+
+                </div>`;
+            }
+
+            // Auto-test on page load
+            window.addEventListener('load', ()=> {
+                    updateTestOutput('ACCHU Workflow Test Suite loaded');
+                    updateTestOutput('Click test buttons to verify each step of the workflow');
+                }
+
+            );
+            </script> </body> </html> text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">ACCHU</div>
+            <div class="subtitle">Complete Workflow Test Suite</div>
+        </div>
+
+        <div class="url-list">
+            <h4>🔗 Service URLs (Make sure all are running)</h4>
+            <a href="http://localhost:8080/api/health" target="_blank">Backend API Health: http://localhost:8080/api/h

@@ -1,0 +1,16 @@
+This is a test document for ACCHU Sandbox Engine integration testing.
+
+Document Details:
+- File Name: test-document.txt
+- Purpose: Integration testing
+- Content: Sample text for printing
+- Date: January 31, 2026
+
+This document will be used to test the complete workflow:
+1. Customer uploads this file via mobile interface
+2. Shopkeeper receives notification
+3. Shopkeeper clicks PRINT button
+4. Document gets printed securely
+5. All data is automatically deleted
+
+ACCHU Sandbox Engine ensures complete data privacy!

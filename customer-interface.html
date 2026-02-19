@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCHU - Customer Upload</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .config-section {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .config-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            Job()">Send to Print Queue</button>
+</div>< !-- Step 3: Loading --> <div id="loading-step"class="step"> <div class="loading"> <div class="spinner"></div> <span>Sending to print queue...</span> </div> </div> < !-- Step 4: Success --> <div id="success-step"class="step"> <div class="success-message">✅ Files sent successfully !</div> <p>Your files have been sent to the shopkeeper's print queue.</p>
+<div class="status info"> <strong>Session ID:</strong> <span id="sessionDisplay"></span><br> <strong>Files uploaded:</strong> <span id="fileCount"></span> </div> <button class="btn"onclick="resetForm()">Upload More Files</button> </div> < !-- Status Messages --> <div id="statusMessages"></div> </div> <script> let selectedFiles=[];
+            const sessionId='customer-session-'+Date.now();
+
+            // File upload handling
+            const fileInput=document.getElementById('fileInput');
+            const uploadArea=document.querySelector('.upload-area');
+            const fileList=document.getElementById('fileList');
+
+            fileInput.addEventListener('change', handleFileSelect);
+
+            function handleFileSelect(event) {
+                const files=Array.from(event.target.files);
+                addFiles(files);
+            }
+
+            function handleDragOver(event) {
+                event.preventDefault();
+                uploadArea.classList.add('dragover');
+            }
+
+            function handleDrop(event) {
+                event.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files=Array.from(event.dataTransfer.files);
+                addFiles(files);
+            }
+
+            function addFiles(files) {
+                selectedFiles=[...selectedFiles,
+                ...files];
+                updateFileList();
+
+                if (selectedFiles.length > 0) {
+                    showStep('config-step');
+                }
+            }
+
+            function updateFileList() {
+                fileList.innerHTML='';
+
+                selectedFiles.forEach((file, index)=> {
+                        const fileItem=document.createElement('div');
+                        fileItem.className='file-item';
+
+                        fileItem.innerHTML=` <div> <div class="file-name">$ {
+                            file.name
+                        }
+
+                        </div> <div class="file-size">$ {
+                            formatFileSize(file.size)
+                        }
+
+                        </div> </div> <button onclick="removeFile(${index})"style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 18px;">✕</button> `;
+                        fileList.appendChild(fileItem);
+                    }
+
+                );
+            }
+
+            function removeFile(index) {
+                selectedFiles.splice(index, 1);
+                updateFileList();
+
+                if (selectedFiles.length===0) {
+                    showStep('upload-step');
+                }
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes===0) return '0 Bytes';
+                const k=1024;
+                const sizes=['Bytes',
+                'KB',
+                'MB',
+                'GB'];
+                const i=Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2))+' '+sizes[i];
+            }
+
+            function showStep(stepId) {
+                document.querySelectorAll('.step').forEach(step=> {
+                        step.classList.remove('active');
+                    }
+
+                );
+                document.getElementById(stepId).classList.add('active');
+            }
+
+            function showStatus(message, type='info') {
+                const statusDiv=document.getElementById('statusMessages');
+                const statusEl=document.createElement('div');
+
+                statusEl.className=`status $ {
+                    type
+                }
+
+                `;
+                statusEl.textContent=message;
+                statusDiv.appendChild(statusEl);
+
+                // Remove after 5 seconds
+                setTimeout(()=> {
+                        statusEl.remove();
+                    }
+
+                    , 5000);
+            }
+
+            async function submitPrintJob() {
+                if (selectedFiles.length===0) {
+                    showStatus('Please select files to upload', 'error');
+                    return;
+                }
+
+                showStep('loading-step');
+
+                try {
+                    // Prepare form data
+                    const formData=new FormData();
+
+                    selectedFiles.forEach(file=> {
+                            formData.append('files', file);
+                        }
+
+                    );
+
+                    // Add print preferences
+                    const printPreferences= {
+                        copies: parseInt(document.getElementById('copies').value),
+                            colorMode: document.getElementById('colorMode').value,
+                            duplex: document.getElementById('duplex').value==='true'
+                    }
+
+                    ;
+                    formData.append('printPreferences', JSON.stringify(printPreferences));
+                    formData.append('sessionId', sessionId);
+
+                    console.log('Uploading to backend...', {
+                            sessionId,
+                            fileCount: selectedFiles.length,
+                            printPreferences
+                        }
+
+                    );
+
+                    // Upload to backend
+                    const response=await fetch('http://localhost:8080/api/integration/customer/upload', {
+                            method: 'POST',
+                            body: formData
+                        }
+
+                    );
+
+                    const result=await response.json();
+                    console.log('Upload result:', result);
+
+                    if (result.success) {
+                        document.getElementById('sessionDisplay').textContent=sessionId;
+                        document.getElementById('fileCount').textContent=selectedFiles.length;
+                        showStep('success-step');
+                        showStatus('Files uploaded successfully!', 'success');
+                    }
+
+                    else {
+                        throw new Error(result.error || 'Upload failed');
+                    }
+                }
+
+                catch (error) {
+                    console.error('Upload error:', error);
+
+                    showStatus(`Failed to upload files: $ {
+                            error.message
+                        }
+
+                        `, 'error');
+                    showStep('config-step');
+                }
+            }
+
+            function resetForm() {
+                selectedFiles=[];
+                fileInput.value='';
+                updateFileList();
+                showStep('upload-step');
+                document.getElementById('statusMessages').innerHTML='';
+            }
+
+            // Show initial status
+            window.onload=function() {
+                showStatus(`Session ID: $ {
+                        sessionId
+                    }
+
+                    `, 'info');
+            }
+
+            ;
+            </script></body></html>transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .file-list {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">ACCHU</div>
+        <div class="subtitle">Upload & Print Service</div>
+
+        <!-- Step 1: File Upload -->
+        <div id="upload-step" class="step active">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                <div class="upload-icon">📁</div>
+                <p>Click or drag files here to upload</p>
+                <p style="font-size: 0.9rem; color: #999;">PDF, DOC, DOCX, JPG, PNG</p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
+            <div id="fileList" class="file-list"></div>
+        </div>
+
+        <!-- Step 2: Print Configuration -->
+        <div id="config-step" class="step">
+            <h3>Print Settings</h3>
+            <div class="config-section">
+                <div class="config-group">
+                    <label for="copies">Number of Copies:</label>
+                    <select id="copies">
+                        <option value="1">1 Copy</option>
+                        <option value="2">2 Copies</option>
+                        <option value="3">3 Copies</option>
+                        <option value="4">4 Copies</option>
+                        <option value="5">5 Copies</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="colorMode">Color Mode:</label>
+                    <select id="colorMode">
+                        <option value="bw">Black & White</option>

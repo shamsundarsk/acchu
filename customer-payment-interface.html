@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCHU - Print & Pay</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .config-section {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .config-group {
+            margin-bottom: 15px;
+        }
+
+
+        .payment-method:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .payment-method.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .payment-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .payment-info {
+            text-align: left;
+        }
+
+        .payment-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .payment-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">ACCHU</div>
+        <div class="subtitle">Print & Pay Service</div>
+
+        <!-- Step 1: File Upload -->
+        <div id="upload-step" class="step active">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                <div class="upload-icon">📁</div>
+                <p>Click or drag files here to upload</p>
+                <p style="font-size: 0.9rem; color: #999;">PDF, DOC, DOCX, JPG, PNG</p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
+            <div id="fileList" class="file-list"></div>
+        </div>
+
+        <!-- Step 2: Print Configuration -->
+        <div id="config-step" class="step">
+            <h3>Print Settings</h3>
+            <div class="config-section">
+                <div class="config-group">
+                    <label for="copies">Number of Copies:</label>
+                    <select id="copies" onchange="updateBill()">
+                        <option value="1">1 Copy</option>
+                        <option value="2">2 Copies</option>
+                        <option value="3">3 Copies</option>
+                        <option value="4">4 Copies</option>
+                        <option value="5">5 Copies</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="colorMode">Color Mode:</label>
+                    <select id="colorMode" onchange="updateBill()">
+                        <option value="bw">Black & White (₹2/page)</option>
+                        <option value="color">Color (₹5/page)</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="duplex">Print Style:</label>
+                    <select id="duplex" onchange="updateBill()">
+                        <option value="false">Single-sided</option>
+                        <option value="true">Double-sided (10% discount)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="showBillSummary()">Continue to Payment</button>
+        </div>
+
+        <!-- Step 3: Bill Summary & Payment -->
+        <div id="payment-step" class="step">
+            <h3>Bill Summary</h3>
+            <div class="bill-summary">
+                <div class="bill-row">
+                    <span class="bill-label">Files:</span>
+                    <span class="bill-value" id="billFiles">0 files</span>
+                </div>
+                <div class="bill-row">
+                    <span class="bill-label">Pages (estimated):</span>
+                    <span class="bill-value" id="billPages">0 pages</span>
+                </div>
+                <div class="bill-row">
+                    <span class="bill-label">Copies:</span>
+                    <span class="bill-value" id="billCopies">1</span>
+                </div>
+                <div class="bill-row">
+                    <span class="bill-label">Color Mode:</span>
+                    <span class="bill-value" id="billColor">Black & White</span>
+                </div>
+                <div class="bill-row">
+                    <span class="bill-label">Print Style:</span>
+                    <span class="bill-value" id="billDuplex">Single-sided</span>
+                </div>
+                <div class="bill-row">
+                    <span class="bill-label">Base Amount:</span>
+                    <span class="bill-value" id="billBase">₹0</span>
+                </div>
+                <div class="bill-row" id="discountRow" style="display: none;">
+                    <span class="bill-label">Discount:</span>
+                    <span class="bill-value" id="billDiscount">₹0</span>
+                </div>
+                <div class="total-row">
+                    <div class="bill-row">
+                        <span class="bill-label">Total Amount:</span>
+                        <span class="bill-value" id="billTotal">₹0</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Payment Method</h3>
+            <div class="payment-methods">
+                <div class="payment-method selected" onclick="selectPaymentMethod('upi')">
+                    <div class="payment-icon">📱</div>
+                    <div class="payment-info">
+                        <div class="payment-name">UPI Payment</div>
+                        <div class="payment-desc">Pay using Google Pay, PhonePe, Paytm</div>
+                    </div>
+                </div>
+                <div class="payment-method" onclick="selectPaymentMethod('card')">
+                    <div class="payment-icon">💳</div>
+                    <div class="payment-info">
+                        <div class="payment-name">Card Payment</div>
+                        <div class="payment-desc">Debit/Credit Card</div>
+                    </div>
+                </div>
+                <div class="payment-method" onclick="selectPaymentMethod('cash')">
+                    <div class="payment-icon">💵</div>
+                    <div class="payment-info">
+                        <div class="payment-name">Pay at Counter</div>
+                        <div class="payment-desc">Pay cash to shopkeeper</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn pay-btn" onclick="processPayment()">
+                💳 Pay ₹<span id="payAmount">0</span> & Print
+            </button>
+        </div>
+
+        <!-- Step 4: Processing -->
+        <div id="processing-step" class="step">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Processing payment & sending to print queue...</span>
+            </div>
+        </div>
+
+        <!-- Step 5: Success -->
+        <div id="success-step" class="step">
+            <div class="success-message">✅ Payment Successful!</div>
+            <p>Your print job has been sent to the shopkeeper for approval.</p>
+            <div class="status success">
+                <strong>Transaction ID:</strong> <span id="transactionId"></span><br>
+                <strong>Session ID:</strong> <span id="sessionDisplay"></span><br>
+                <strong>Amount Paid:</strong> ₹<span id="paidAmount"></span>
+            </div>
+            <div class="status info">
+                <strong>Next Steps:</strong><br>
+                1. Shopkeeper will review your files<br>
+                2. Print job will be approved<br>
+                3. Your documents will be printed<br>
+                4. Collect from the counter
+            </div>
+            <button class="btn" onclick="resetForm()">Print More Files</button>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusMessages"></div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let selectedPaymentMethod = 'upi';
+        const sessionId = 'customer-session-' + Date.now();
+
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.querySelector('.upload-area');
+        const fileList = document.getElementById('fileList');
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            addFiles(files);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(event.dataTransfer.files);
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            selectedFiles = [...selectedFiles, ...files];
+            updateFileList();
+            if (selectedFiles.length > 0) {
+                showStep('config-step');
+            }
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button onclick="removeFile(${index})" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 18px;">✕</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            if (selectedFiles.length === 0) {
+                showStep('upload-step');
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('statusMessages');
+            const statusEl = document.createElement('div');
+            statusEl.className = `status ${type}`;
+            statusEl.textContent = message;
+            statusDiv.appendChild(statusEl);
+
+            setTimeout(() => {
+                statusEl.remove();
+            }, 5000);
+        }
+
+        function updateBill() {
+            const copies = parseInt(document.getElementById('copies').value);
+            const colorMode = document.getElementById('colorMode').value;
+            const duplex = document.getElementById('duplex').value === 'true';
+
+            // Estimate pages (2 pages per file average)
+            const estimatedPages = selectedFiles.length * 2;
+            const totalPages = estimatedPages * copies;
+
+            // Calculate pricing
+            const pricePerPage = colorMode === 'color' ? 5 : 2;
+            const baseAmount = totalPages * pricePerPage;
+            const discount = duplex ? Math.floor(baseAmount * 0.1) : 0;
+            const totalAmount = baseAmount - discount;
+
+            // Update bill display
+            document.getElementById('billFiles').textContent = `${selectedFiles.length} files`;
+            document.getElementById('billPages').textContent = `${estimatedPages} pages`;
+            document.getElementById('billCopies').textContent = copies;
+            document.getElementById('billColor').textContent = colorMode === 'color' ? 'Color' : 'Black & White';
+            document.getElementById('billDuplex').textContent = duplex ? 'Double-sided' : 'Single-sided';
+            document.getElementById('billBase').textContent = `₹${baseAmount}`;
+            document.getElementById('billTotal').textContent = `₹${totalAmount}`;
+            document.getElementById('payAmount').textContent = totalAmount;
+
+            if (discount > 0) {
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('billDiscount').textContent = `-₹${discount}`;
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+            }
+        }
+
+        function showBillSummary() {
+            updateBill();
+            showStep('payment-step');
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.target.closest('.payment-method').classList.add('selected');
+        }
+
+        async function processPayment() {
+            showStep('processing-step');
+
+            try {
+                // Simulate payment processing
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Prepare form data for upload
+                const formData = new FormData();
+                selectedFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                // Add individual print preference fields (not JSON)
+                formData.append('sessionId', sessionId);
+                formData.append('copies', document.getElementById('copies').value);
+                formData.append('colorMode', document.getElementById('colorMode').value);
+                formData.append('quality', 'standard');
+                formData.append('pages', 'all');
+
+                console.log('Uploading files with payment...', {
+                    sessionId,
+                    fileCount: selectedFiles.length,
+                    printPreferences,
+                    paymentMethod: selectedPaymentMethod
+                });
+
+                // Upload to backend
+                const response = await fetch('http://localhost:8080/api/integration/customer/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Upload result:', result);
+
+                if (result.success) {
+                    // Generate transaction ID
+                    const transactionId = 'TXN' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
+                    const totalAmount = document.getElementById('payAmount').textContent;
+
+                    document.getElementById('transactionId').textContent = transactionId;
+                    document.getElementById('sessionDisplay').textContent = sessionId;
+                    document.getElementById('paidAmount').textContent = totalAmount;
+
+                    showStep('success-step');
+                    showStatus('Payment successful! Files sent to shopkeeper.', 'success');
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Payment/Upload error:', error);
+                showStatus(`Payment failed: ${error.message}`, 'error');
+                showStep('payment-step');
+            }
+        }
+
+        function resetForm() {
+            selectedFiles = [];
+            fileInput.value = '';
+            updateFileList();
+            showStep('upload-step');
+            document.getElementById('statusMessages').innerHTML = '';
+        }
+
+        // Initialize
+        window.onload = function() {
+            showStatus(`Session started: ${sessionId}`, 'info');
+        };
+    </script>
+</body>
+
+</html>
+label {
+display: block;
+margin-bottom: 5px;
+font-weight: 500;
+color: #333;
+}
+
+select,
+input {
+width: 100%;
+padding: 10px;
+border: 2px solid #eee;
+border-radius: 8px;
+font-size: 16px;
+box-sizing: border-box;
+}
+
+select:focus,
+input:focus {
+outline: none;
+border-color: #667eea;
+}
+
+.btn {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+border: none;
+padding: 15px 30px;
+border-radius: 25px;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+margin-top: 20px;
+}
+
+.btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+transform: none;
+}
+
+.btn.pay-btn {
+background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.btn.pay-btn:hover {
+box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+}
+
+.file-list {
+margin: 15px 0;
+text-align: left;
+}
+
+.file-item {
+background: #f8f9fa;
+padding: 10px;
+border-radius: 8px;
+margin-bottom: 8px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.file-name {
+font-weight: 500;
+color: #333;
+}
+
+.file-size {
+color: #666;
+font-size: 0.9rem;
+}
+
+.step {
+display: none;
+}
+
+.step.active {
+display: block;
+}
+
+.success-message {
+color: #28a745;
+font-weight: 600;
+margin: 20px 0;
+}
+
+.error-message {
+color: #dc3545;
+font-weight: 600;
+margin: 20px 0;
+}
+
+.loading {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 10px;
+margin: 20px 0;
+}
+
+.spinner {
+width: 20px;
+height: 20px;
+border: 2px solid #f3f3f3;
+border-top: 2px solid #667eea;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.bill-summary {
+background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: left;
+border: 1px solid #e9ecef;
+}
+.bill-row {
+display: flex; justify-content: space-between; margin-bottom: 10px;
+padding-bottom: 8px; border-bottom: 1px solid #e9ecef;
+}
+.bill-row:last-child { border-

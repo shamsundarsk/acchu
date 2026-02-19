@@ -1,0 +1,3 @@
+Test file to verify CORS fix
+Session: test-cors-session
+This should work now with the updated CORS policy

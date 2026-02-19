@@ -1,0 +1,6 @@
+E:\Hackathons\Genesis 2.0\tests\AcchuSandboxEngine.Tests\bin\Debug\net8.0\CoverletSourceRootsMapping_AcchuSandboxEngine.Tests
+E:\Hackathons\Genesis 2.0\tests\AcchuSandboxEngine.Tests\obj\Debug\net8.0\AcchuSandboxEngine.Tests.csproj.AssemblyReference.cache
+E:\Hackathons\Genesis 2.0\tests\AcchuSandboxEngine.Tests\obj\Debug\net8.0\AcchuSandboxEngine.Tests.GeneratedMSBuildEditorConfig.editorconfig
+E:\Hackathons\Genesis 2.0\tests\AcchuSandboxEngine.Tests\obj\Debug\net8.0\AcchuSandboxEngine.Tests.AssemblyInfoInputs.cache
+E:\Hackathons\Genesis 2.0\tests\AcchuSandboxEngine.Tests\obj\Debug\net8.0\AcchuSandboxEngine.Tests.AssemblyInfo.cs
+E:\Hackathons\Genesis 2.0\tests\AcchuSandboxEngine.Tests\obj\Debug\net8.0\AcchuSandboxEngine.Tests.csproj.CoreCompileInputs.cache

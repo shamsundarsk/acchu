@@ -1,0 +1,56 @@
+{
+    "name": "acchu-agent",
+    "version": "1.0.0",
+    "description": "ACCHU Print Agent - Secure printing for xerox shops",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder",
+        "build:win": "electron-builder --win --x64"
+    },
+    "author": "ACCHU",
+    "license": "MIT",
+    "dependencies": {
+        "axios": "^1.6.0",
+        "qrcode": "^1.5.4",
+        "ws": "^8.14.0"
+    },
+    "engines": {
+        "node": ">=16.0.0"
+    },
+    "devDependencies": {
+        "electron": "^33.2.1",
+        "electron-builder": "^25.1.8"
+    },
+    "build": {
+        "appId": "com.acchu.agent",
+        "productName": "ACCHU Agent",
+        "directories": {
+            "output": "dist"
+        },
+        "win": {
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "icon": "assets/icon.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "ACCHU Agent"
+        },
+        "files": [
+            "main.js",
+            "preload.js",
+            "renderer/**/*",
+            "assets/**/*"
+        ]
+    }
+}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ACCHU Cleanup Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ACCHU File Cleanup Verification</h1>
+
+    <div class="info">
+        <strong>Purpose:</strong> This tool helps verify if the ACCHU system is properly cleaning up expired session files.
+    </div>
+
+    <button onclick="checkCleanupStatus()">Check Cleanup Status</button>
+    <button onclick="triggerManualCleanup()">Trigger Manual Cleanup</button>
+    <button onclick="listOldSessions()">List Old Sessions</button>
+
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'https://unskewed-krystin-syzygial.ngrok-free.dev';
+
+        async function checkCleanupStatus() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="info">Checking cleanup status...</div>';
+
+            try {
+                // Check diagnostics endpoint
+                const response = await fetch(`${API_BASE}/api/diagnostics/health`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    results.innerHTML = `
+                        <div class="success">
+                            <h3>System Status</h3>
+                            <p><strong>Status:</strong> ${data.status || 'Unknown'}</p>
+                            <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+                        </div>
+                    `;
+                } else {
+                    results.innerHTML = `<div class="error">Failed to get system status: ${response.status}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="error">Error checking status: ${error.message}</div>`;
+            }
+        }
+
+        async function triggerManualCleanup() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="info">Triggering manual cleanup...</div>';
+
+            try {
+                // Try to trigger cleanup via session endpoint
+                const response = await fetch(`${API_BASE}/api/session/cleanup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+
+                if (response.ok) {
+                    results.innerHTML = '<div class="success">Manual cleanup triggered successfully!</div>';
+                } else {
+                    results.innerHTML = `<div class="error">Failed to trigger cleanup: ${response.status} - ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="error">Error triggering cleanup: ${error.message}</div>`;
+            }
+        }
+
+        async function listOldSessions() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="info">Listing session information...</div>';
+
+            try {
+                // Get diagnostics info
+                const response = await fetch(`${API_BASE}/api/diagnostics/system-info`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    results.innerHTML = `
+                        <div class="info">
+                            <h3>System Information</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    results.innerHTML = `<div class="error">Failed to get system info: ${response.status}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="error">Error getting system info: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-check status on page load
+        window.onload = function() {
+            checkCleanupStatus();
+        };
+    </script>
+</body>
+
+</html>

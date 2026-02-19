@@ -1,0 +1,3 @@
+Test file for session debugging
+Session: test-debug-session
+Testing the improved error handling

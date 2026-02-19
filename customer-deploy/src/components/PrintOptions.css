@@ -1,0 +1,303 @@
+.print-options {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.print-options h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.print-options h4 {
+  margin: 20px 0 15px 0;
+  color: #333;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+}
+
+.no-files-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.options-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 1rem;
+}
+
+.input-with-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.copies-input {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.copies-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.input-info {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.color-mode-select,
+.paper-size-select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+}
+
+.color-mode-select:focus,
+.paper-size-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.checkbox-group {
+  margin-top: 10px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.duplex-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-text {
+  color: #333;
+  font-size: 1rem;
+}
+
+.discount-info {
+  color: #28a745;
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+/* Print Summary */
+.print-summary {
+  background: white;
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row span:first-child {
+  color: #666;
+  font-weight: 500;
+}
+
+.summary-row span:last-child {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Pricing Breakdown */
+.pricing-breakdown {
+  background: white;
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.calculating {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.pricing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pricing-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pricing-row:last-child {
+  border-bottom: none;
+}
+
+.pricing-row span:first-child {
+  color: #666;
+  font-weight: 500;
+}
+
+.pricing-row span:last-child {
+  color: #333;
+  font-weight: 600;
+}
+
+.pricing-row.discount span:first-child {
+  color: #28a745;
+}
+
+.pricing-row.discount span:last-child {
+  color: #28a745;
+}
+
+.pricing-row.total {
+  border-top: 2px solid #007bff;
+  padding-top: 15px;
+  margin-top: 10px;
+  font-size: 1.1rem;
+}
+
+.pricing-row.total span {
+  font-weight: 700;
+}
+
+.total-price {
+  color: #007bff !important;
+  font-size: 1.3rem !important;
+}
+
+/* Validation Error */
+.validation-error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #f5c6cb;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.validation-error p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .print-options {
+    padding: 15px;
+    margin: 0 10px;
+  }
+  
+  .print-options h3 {
+    font-size: 1.3rem;
+  }
+  
+  .print-options h4 {
+    font-size: 1.1rem;
+  }
+  
+  .input-with-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .summary-row,
+  .pricing-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 12px 0;
+  }
+  
+  .summary-row span:last-child,
+  .pricing-row span:last-child {
+    align-self: flex-end;
+  }
+  
+  .total-price {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* Animation for price updates */
+.pricing-details {
+  transition: all 0.3s ease;
+}
+
+.calculating {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}

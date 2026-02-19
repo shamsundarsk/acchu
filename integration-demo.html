@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCHU Integration Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .shopkeeper-section {
+            border-left: 4px solid #007bff;
+        }
+
+        .customer-section {
+            border-left: 4px solid #28a745;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+
+        .file-upload {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .print-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .status-updates {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button.success {
+            background: #28a745;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        .pending-job {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🖨️ ACCHU Sandbox Engine - Integration Demo</h1>
+
+    <!-- SHOPKEEPER SECTION -->
+    <div class="container shopkeeper-section">
+        <h2>🏪 Shopkeeper Web Interface</h2>
+
+        <div>
+            <h3>Step 1: Generate QR Code</h3>
+            <input type="text" id="shopkeeperId" placeholder="Shopkeeper ID" value="shop001">
+            <input type="text" id="shopName" placeholder="Shop Name" value="Raj Xerox Center">
+            <button onclick="generateQR()">Generate QR Code & Download Sandbox</button>
+        </div>
+
+        <div id="qrSection" style="display: none;">
+            <h3>Step 2: QR Code Generated</h3>
+            <div class="qr-code" id="qrDisplay">QR Code will appear here</div>
+            <p><strong>Session ID:</strong> <span id="sessionId"></span></p>
+            <button onclick="downloadSandbox()">Download Sandbox Engine</button>
+        </div>
+
+        <div>
+            <h3>Step 3: Pending Print Jobs</h3>
+            <button onclick="refreshJobs()">Refresh Jobs</button>
+            <div id="pendingJobs"></div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER SECTION -->
+    <div class="container customer-section">
+        <h2>📱 Customer Mobile Interface</h2>
+
+        <div>
+            <h3>Step 1: Scan QR Code (Simulated)</h3>
+            <input type="text" id="customerSessionId" placeholder="Session ID from QR scan">
+            <button onclick="connectCustomer()">Connect to Session</button>
+        </div>
+
+        <div id="customerUpload" style="display: none;">
+            <h3>Step 2: Upload File & Select Options</h3>
+
+            <div class="file-upload">
+                <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.jpg,.png,.txt">
+                <p>Select a file to print</p>
+            </div>
+
+            <div class="print-options">
+                <div>
+                    <label>Copies:</label>
+                    <select id="copies">
+                        <option value="1">1 copy</option>
+                        <option value="2">2 copies</option>
+                        <option value="3">3 copies</option>
+                        <option value="5">5 copies</option>
+                        <option value="10">10 copies</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Color:</label>
+                    <select id="colorMode">
+                        <option value="false">Black & White (₹2/page)</option>
+                        <option value="true">Color (₹6/page)</option>
+                    </select> </div>
+                <div>
+                    <label>Sides:</label>
+                    <select id="duplexMode">
+                        <option value="false">Single-sided</option>
+                        <option value="true">Double-sided (20% discount)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Customer Name (optional):</label>
+                    <input type="text" id="customerName" placeholder="Your name">
+                </div>ignalr.min.js"></script>
+                <script>
+                    let connection;
+                    let currentSessionId = '';
+
+                    // Initialize SignalR connection
+                    async function initializeSignalR() {
+                        connection = new signalR.HubConnectionBuilder()
+                            .withUrl("http://localhost:8080/integration-hub")
+                            .build();
+
+                        connection.on("StatusUpdate", function(statusUpdate) {
+                            addStatusUpdate(`[${statusUpdate.eventType}] ${statusUpdate.message}`, statusUpdate.status);
+
+                            // Handle specific events
+                            if (statusUpdate.eventType === "FileUploaded") {
+                                refreshJobs();
+                            } else if (statusUpdate.eventType === "PrintCompleted") {
+                                addStatusUpdate("✅ Print completed successfully!", "success");
+                            } else if (statusUpdate.eventType === "SessionEnded") {
+                                addStatusUpdate("🔒 Session ended - all data securely deleted", "info");
+                            }
+                        });
+
+                        try {
+                            await connection.start();
+                            addStatusUpdate("🔗 Connected to real-time updates", "info");
+                        } catch (err) {
+                            addStatusUpdate("❌ Failed to connect to real-time updates: " + err, "error");
+                        }
+                    }
+
+                    // Shopkeeper functions
+                    async function generateQR() {
+                        const shopkeeperId = document.getElementById('shopkeeperId').value;
+                        const shopName = document.getElementById('shopName').value;
+
+                        if (!shopkeeperId || !shopName) {
+                            alert('Please enter shopkeeper ID and shop name');
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch('http://localhost:8080/api/integration/shopkeeper/generate-qr', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    shopkeeperId: shopkeeperId,
+                                    shopName: shopName
+                                })
+                            });
+
+                            const result = await response.json();
+
+                            if (result.success) {
+                                currentSessionId = result.sessionId;
+                                document.getElementById('sessionId').textContent = result.sessionId;
+                                document.getElementById('qrDisplay').innerHTML = `<img src="${result.qrCodeUrl}" alt="QR Code" style="max-width: 100%;">`;
+                                document.getElementById('qrSection').style.display = 'block';
+
+                                // Join shopkeeper session for real-time updates
+                                if (connection) {
+                                    await connection.invoke("JoinShopkeeperSession", result.sessionId);
+                                }
+
+                                addStatusUpdate(`🏪 QR generated for ${shopName} (Session: ${result.sessionId})`, "success");
+                            } else {
+                                addStatusUpdate(`❌ Failed to generate QR: ${result.errorMessage}`, "error");
+                            }
+                        } catch (error) {
+                            addStatusUpdate(`❌ Error generating QR: ${error.message}`, "error");
+                        }
+                    }
+
+                    async function downloadSandbox() {
+                        try {
+                            const response = await fetch('http://localhost:8080/api/integration/download/sandbox');
+                            if (response.ok) {
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'AcchuSandboxEngine.exe';
+                                a.click();
+                                addStatusUpdate("📦 Sandbox installer downloaded", "success");
+                            } else {
+                                addStatusUpdate("❌ Failed to download sandbox installer", "error");
+                            }
+                        } catch (error) {
+                            addStatusUpdate(`❌ Download error: ${error.message}`, "error");
+                        }
+                    }
+
+                    async function refreshJobs() {
+                        if (!currentSessionId) {
+                            addStatusUpdate("❌ No active session", "error");
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(`http://localhost:8080/api/integration/shopkeeper/${currentSessionId}/pending-jobs`);
+                            const result = await response.json();
+
+                            const jobsDiv = document.getElementById('pendingJobs');
+                            if (result.success && result.pendingJobs.length > 0) {
+                                jobsDiv.innerHTML = result.pendingJobs.map(job => `
+                        <div class="pending-job">
+                            <strong>${job.fileName}</strong> (${(job.fileSize / 1024).toFixed(1)} KB)<br>
+                            Copies: ${job.printPreferences.copies} | 
+                            ${job.printPreferences.isColor ? 'Color' : 'B&W'} | 
+                            ${job.printPreferences.isDuplex ? 'Duplex' : 'Single-sided'}<br>
+                            Cost: ₹${job.estimatedCost.toFixed(2)}<br>
+                            <button onclick="printJob('${job.fileName}')" class="success">🖨️ PRINT</button>
+                        </div>
+                    `).join('');
+                            } else {
+                                jobsDiv.innerHTML = '<p>No pending jobs</p>';
+                            }
+                        } catch (error) {
+                            addStatusUpdate(`❌ Error refreshing jobs: ${error.message}`, "error");
+                        }
+                    }
+
+                    async function printJob(fileName) {
+                        try {
+                            const response = await fetch(`http://localhost:8080/api/integration/shopkeeper/${currentSessionId}/print/${fileName}`, {
+                                method: 'POST'
+                            });
+
+                            const result = await response.json();
+
+                            if (result.success) {
+                                addStatusUpdate(`🖨️ Print job started for ${fileName}`, "success");
+                                refreshJobs();
+                            } else {
+                                addStatusUpdate(`❌ Print failed: ${result.errorMessage}`, "error");
+                            }
+                        } catch (error) {
+                            addStatusUpdate(`❌ Print error: ${error.message}`, "error");
+                        }
+                    }
+
+                    // Customer functions
+                    async function connectCustomer() {
+                        const sessionId = document.getElementById('customerSessionId').value;
+                        if (!sessionId) {
+                            alert('Please enter session ID from QR scan');
+                            return;
+                        }
+
+                        currentSessionId = sessionId;
+                        document.getElementById('customerUpload').style.display = 'block';
+
+                        // Join customer session for real-time updates
+                        if (connection) {
+                            await connection.invoke("JoinCustomerSession", sessionId);
+                        }
+
+                        addStatusUpdate(`📱 Customer connected to session ${sessionId}`, "info");
+                    }
+
+                    async function uploadFile() {
+                        const fileInput = document.getElementById('fileInput');
+                        const file = fileInput.files[0];
+
+                        if (!file) {
+                            alert('Please select a file');
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('sessionId', currentSessionId);
+                        formData.append('fileName', file.name);
+                        formData.append('copies', document.getElementById('copies').value);
+                        formData.append('isColor', document.getElementById('colorMode').value);
+                        formData.append('isDuplex', document.getElementById('duplexMode').value);
+                        formData.append('customerName', document.getElementById('customerName').value);
+
+                        try {
+                            addStatusUpdate(`📤 Uploading ${file.name}...`, "info");
+
+                            const response = await fetch('http://localhost:8080/api/integration/customer/upload', {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            const result = await response.json();
+
+                            if (result.success) {
+                                addStatusUpdate(`✅ File uploaded successfully! Estimated cost: ₹${result.estimatedCost.toFixed(2)}`, "success");
+                                document.getElementById('estimatedCost').innerHTML = `<strong>Estimated Cost: ₹${result.estimatedCost.toFixed(2)}</strong>`;
+                            } else {
+                                addStatusUpdate(`❌ Upload failed: ${result.errorMessage}`, "error");
+                            }
+                        } catch (error) {
+                            addStatusUpdate(`❌ Upload error: ${error.message}`, "error");
+                        }
+                    }
+
+                    // Utility functions
+                    function addStatusUpdate(message, type = 'info') {
+                        const statusDiv = document.getElementById('statusUpdates');
+                        const timestamp = new Date().toLocaleTimeString();
+                        const colorClass = type === 'error' ? 'color: red;' :
+                            type === 'success' ? 'color: green;' :
+                            type === 'info' ? 'color: blue;' : '';
+
+                        statusDiv.innerHTML += `<div style="${colorClass}">[${timestamp}] ${message}</div>`;
+                        statusDiv.scrollTop = statusDiv.scrollHeight;
+                    }
+
+                    function clearStatus() {
+                        document.getElementById('statusUpdates').innerHTML = '';
+                    }
+
+                    // Initialize when page loads
+                    window.onload = function() {
+                        initializeSignalR();
+                        addStatusUpdate("🚀 ACCHU Integration Demo loaded", "info");
+                        addStatusUpdate("💡 Start by generating a QR code in the shopkeeper section", "info");
+                    };
+                </script>
+</body>
+
+</html>

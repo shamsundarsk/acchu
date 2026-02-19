@@ -1,0 +1,8 @@
+This is a test document for ACCHU print workflow testing.
+
+Content:
+- Line 1: Test content
+- Line 2: More test content
+- Line 3: Final test content
+
+This document should be uploaded through the customer interface and appear in the shopkeeper dashboard for printing.

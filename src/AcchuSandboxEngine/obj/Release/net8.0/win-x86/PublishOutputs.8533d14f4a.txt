@@ -1,0 +1,12 @@
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\publish\web.config
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\appsettings.Development.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\appsettings.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\appsettings.Production.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\appsettings.Template.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\publish\appsettings.Development.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\publish\appsettings.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\publish\appsettings.Production.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\publish\appsettings.Template.json
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\AcchuSandboxEngine.pdb
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\aspnetcorev2_inprocess.dll
+E:\Hackathons\Genesis 2.0\src\AcchuSandboxEngine\publish-x86\AcchuSandboxEngine.exe

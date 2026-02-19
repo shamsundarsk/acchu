@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCHU Deployed Workflow Test</title>
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f2f0e9;
+        }
+
+        .step {
+            background: white;
+            border: 2px solid black;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        .step h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .link {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px 10px 10px 0;
+            font-weight: bold;
+        }
+
+        .link:hover {
+            background: #0056b3;
+        }
+
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🐘 ACCHU Complete Workflow Test</h1>
+    <p><strong>Testing the complete end-to-end workflow with deployed applications</strong></p>
+
+    <div class="step success">
+        <h3>✅ Step 1: Shopkeeper Dashboard (Deployed)</h3>
+        <p>The shopkeeper logs in and generates a QR code for customers to scan.</p>
+        <a href="https://frontend-web-beta-wheat.vercel.app" target="_blank" class="link">
+            🏪 Open Shopkeeper Dashboard
+        </a>
+        <p><small>Login with any shop ID (e.g., "shop001") to generate a session QR code.</small></p>
+    </div>
+
+    <div class="step info">
+        <h3>📱 Step 2: Customer Interface (Deployed)</h3>
+        <p>Customers scan the QR code or use the direct link to access their session.</p>
+        <a href="https://customer-deploy-silk.vercel.app" target="_blank" class="link">
+            📱 Customer Interface Home
+        </a>
+        <a href="https://customer-deploy-silk.vercel.app/session/demo-session-123" target="_blank" class="link">
+            🧪 Test Session (Demo)
+        </a>
+        <p><small>The QR code from the shopkeeper dashboard will generate a real session link.</small></p>
+    </div>
+
+    <div class="step">
+        <h3>🔄 Step 3: Complete Workflow</h3>
+        <ol>
+            <li><strong>Shopkeeper:</strong> Open the dashboard and generate a QR code</li>
+            <li><strong>Customer:</strong> Scan the QR code or click the "Mobile Customer UI" link</li>
+            <li><strong>Customer:</strong> Upload files and make payment</li>
+            <li><strong>Shopkeeper:</strong> See files appear in the print dashboard</li>
+            <li><strong>Shopkeeper:</strong> Execute print jobs</li>
+        </ol>
+    </div>
+
+    <div class="step success">
+        <h3>🔧 Backend Services</h3>
+        <p><strong>AcchuSandboxEngine:</strong> Running on ngrok tunnel</p>
+        <a href="https://unskewed-krystin-syzygial.ngrok-free.dev/api/health" target="_blank" class="link">
+            ⚡ Check Backend Health
+        </a>
+        <p><small>This handles file uploads, session management, and print job execution.</small></p>
+    </div>
+
+    <div class="step info">
+        <h3>📋 Test Instructions</h3>
+        <p><strong>To test the complete workflow:</strong></p>
+        <ol>
+            <li>Open the Shopkeeper Dashboard</li>
+            <li>Login with shop ID "shop001"</li>
+            <li>Copy the session ID from the QR code section</li>
+            <li>Open the Customer Interface with that session ID</li>
+            <li>Upload a test file and complete the payment flow</li>
+            <li>Return to the shopkeeper dashboard to see the uploaded files</li>
+        </ol>
+    </div>
+
+    <script>
+        // Auto-refresh health check
+        setTimeout(() => {
+            fetch('https://unskewed-krystin-syzygial.ngrok-free.dev/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Backend health:', data);
+                    if (data.status === 'healthy') {
+                        document.querySelector('.step.success h3').innerHTML += ' ✅';
+                    }
+                })
+                .catch(error => {
+                    console.error('Backend health check failed:', error);
+                });
+        }, 1000);
+    </script>
+</body>
+
+</html>
