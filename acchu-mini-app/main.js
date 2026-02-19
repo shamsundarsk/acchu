@@ -1,6 +1,5 @@
 const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron');
 const path = require('path');
-const WebSocket = require('ws');
 const axios = require('axios');
 const os = require('os');
 const fs = require('fs');
@@ -9,13 +8,15 @@ const PrinterService = require('./services/PrinterService');
 
 let mainWindow = null;
 let tray = null;
-let ws = null;
 let printQueue = [];
 let printerService = null;
 
 // Configuration
 const BACKEND_URL = process.env.BACKEND_URL || 'https://acchu-six.vercel.app';
-const WS_URL = BACKEND_URL.replace('http', 'ws').replace('https', 'wss') + '/ws';
+const POLLING_INTERVAL = 5000; // Poll every 5 seconds
+
+// Remove WebSocket - use HTTP polling instead
+let pollingInterval = null;
 
 // Create temp directory for downloaded files
 const TEMP_DIR = path.join(os.tmpdir(), 'acchu-print-shop');
@@ -84,7 +85,7 @@ function createTray() {
                 enabled: false
             },
             {
-                label: ws && ws.readyState === WebSocket.OPEN ? '● Connected' : '○ Disconnected',
+                label: pollingInterval ? '● Connected' : '○ Disconnected',
                 enabled: false
             },
             { type: 'separator' },
@@ -120,105 +121,69 @@ function createTray() {
     setInterval(updateTrayMenu, 5000);
 }
 
-function connectWebSocket() {
-    console.log('Connecting to backend:', WS_URL);
+function startPolling() {
+    console.log('Starting HTTP polling for print jobs');
+    
+    // Poll immediately
+    pollForJobs();
+    
+    // Then poll every 5 seconds
+    pollingInterval = setInterval(pollForJobs, POLLING_INTERVAL);
+}
 
-    ws = new WebSocket(WS_URL);
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
 
-    ws.on('open', () => {
-        console.log('Connected to backend');
+async function pollForJobs() {
+    try {
+        // Get pending print jobs from backend
+        const response = await axios.get(`${BACKEND_URL}/api/print-jobs/pending`);
         
-        // Send connection message
-        ws.send(JSON.stringify({
-            type: 'local-agent-connected',
-            data: {
-                shopId: 'shop-001',
-                timestamp: new Date()
-            },
-            timestamp: new Date()
-        }));
-
-        // Notify renderer
+        if (response.data.success && response.data.jobs) {
+            const newJobs = response.data.jobs;
+            
+            // Add new jobs to queue
+            newJobs.forEach(job => {
+                // Check if job already exists
+                const exists = printQueue.find(j => j.id === job.id);
+                if (!exists) {
+                    printQueue.push({
+                        id: job.id,
+                        sessionId: job.sessionId,
+                        fileName: job.fileName,
+                        fileUrl: job.fileUrl,
+                        printOptions: job.printOptions,
+                        pricing: job.pricing,
+                        paymentStatus: job.paymentStatus,
+                        status: 'pending',
+                        timestamp: new Date(job.timestamp)
+                    });
+                    
+                    console.log(`New print job received: ${job.id}`);
+                }
+            });
+            
+            // Notify renderer
+            if (mainWindow && printQueue.length > 0) {
+                mainWindow.webContents.send('print-queue-updated', printQueue);
+            }
+        }
+        
+        // Update connection status
         if (mainWindow) {
             mainWindow.webContents.send('connection-status', { connected: true });
         }
-    });
-
-    ws.on('message', (data) => {
-        try {
-            const message = JSON.parse(data.toString());
-            console.log('Received message:', message.type);
-
-            handleWebSocketMessage(message);
-        } catch (error) {
-            console.error('Error parsing message:', error);
-        }
-    });
-
-    ws.on('close', () => {
-        console.log('Disconnected from backend');
-        ws = null;
-
+    } catch (error) {
+        console.error('Polling error:', error.message);
+        
+        // Update connection status
         if (mainWindow) {
             mainWindow.webContents.send('connection-status', { connected: false });
         }
-
-        // Reconnect after 5 seconds
-        setTimeout(connectWebSocket, 5000);
-    });
-
-    ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-    });
-}
-
-function handleWebSocketMessage(message) {
-    switch (message.type) {
-        case 'create-print-job':
-            // New print job received
-            const job = {
-                id: message.jobId,
-                sessionId: message.sessionId,
-                fileName: message.data.fileName,
-                fileUrl: message.data.fileUrl,
-                printOptions: message.data.printOptions,
-                pricing: message.data.pricing,
-                paymentStatus: message.data.paymentStatus,
-                status: 'pending',
-                timestamp: new Date(message.timestamp)
-            };
-
-            printQueue.push(job);
-            
-            // Notify renderer
-            if (mainWindow) {
-                mainWindow.webContents.send('print-queue-updated', printQueue);
-            }
-            break;
-
-        case 'print-job-status-update':
-            // Update job status
-            const jobIndex = printQueue.findIndex(j => j.id === message.jobId);
-            if (jobIndex !== -1) {
-                printQueue[jobIndex].status = message.data.status;
-                
-                if (mainWindow) {
-                    mainWindow.webContents.send('print-queue-updated', printQueue);
-                }
-            }
-            break;
-
-        case 'payment-completed':
-            // Payment completed for a job
-            const paidJobIndex = printQueue.findIndex(j => j.id === message.jobId);
-            if (paidJobIndex !== -1) {
-                printQueue[paidJobIndex].paymentStatus = 'completed';
-                
-                if (mainWindow) {
-                    mainWindow.webContents.send('print-queue-updated', printQueue);
-                }
-            }
-            break;
     }
 }
 
@@ -229,7 +194,7 @@ ipcMain.handle('get-print-queue', async () => {
 
 ipcMain.handle('get-connection-status', async () => {
     return {
-        connected: ws && ws.readyState === WebSocket.OPEN
+        connected: pollingInterval !== null
     };
 });
 
@@ -391,7 +356,7 @@ app.whenReady().then(async () => {
     
     createWindow();
     createTray();
-    connectWebSocket();
+    startPolling(); // Start HTTP polling instead of WebSocket
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -406,7 +371,5 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
     app.isQuitting = true;
-    if (ws) {
-        ws.close();
-    }
+    stopPolling(); // Stop polling
 });
