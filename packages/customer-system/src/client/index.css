@@ -1374,3 +1374,21 @@ body {
     background: #e5e7eb;
     transform: translateY(-1px);
 }
+
+/* QR Code Image Styling */
+.qr-code-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-btn:disabled:hover {
+    transform: none;
+    background: #1a1a1a;
+}
