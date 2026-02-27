@@ -113,32 +113,6 @@ function SessionPage() {
     }
   }, [wsErrorMessage, clearError]);
 
-  const fetchSessionInfo = async () => {
-    try {
-      const response = await fetch(`/api/sessions/${sessionId}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setSessionInfo(data.data);
-        if (data.data.session.files) {
-          setUploadedFiles(data.data.session.files);
-          if (data.data.session.files.length > 0) {
-            setCurrentStep('config');
-          }
-        }
-        if (data.data.session.paymentStatus === PaymentStatus.COMPLETED) {
-          setCurrentStep('print');
-        }
-      } else {
-        setError(data.error || 'Failed to load session');
-      }
-    } catch (err) {
-      setError('Network error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleFilesUploaded = (files: FileMetadata[]) => {
     setUploadedFiles(files);
     if (files.length > 0) {
