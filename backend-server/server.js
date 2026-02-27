@@ -18,6 +18,10 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle preflight requests for all routes
+app.options('*', cors());
+
 app.use(express.json({ limit: '50mb' }));
 
 // In-memory storage (persists as long as server runs)
