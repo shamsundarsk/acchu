@@ -45,7 +45,8 @@ function SessionPage() {
       return;
     }
 
-    fetchSessionInfo();
+    // Skip fetching session info - work with client-side state only
+    setLoading(false);
   }, [sessionId]);
 
   // Handle WebSocket session status updates
@@ -252,17 +253,6 @@ function SessionPage() {
         <div className="error-content">
           <h2>Session Error</h2>
           <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!sessionInfo?.isValid) {
-    return (
-      <div className="mobile-app error-state">
-        <div className="error-content">
-          <h2>Invalid Session</h2>
-          <p>This session has expired or is not valid.</p>
         </div>
       </div>
     );
