@@ -1,6 +1,6 @@
 {
   "name": "@sps/customer-system",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ACCHU Customer System - Web interface for customers",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
