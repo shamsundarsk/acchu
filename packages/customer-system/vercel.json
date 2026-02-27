@@ -3,6 +3,8 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "functions": {
     "api/upload-file.js": {
       "maxDuration": 60,
@@ -10,6 +12,11 @@
     }
   },
   "routes": [
+    {
+      "src": "/assets/(.*)",
+      "headers": { "Cache-Control": "public, max-age=0, must-revalidate" },
+      "dest": "/assets/$1"
+    },
     {
       "src": "/api/test-job",
       "dest": "/api/test-job.js"
