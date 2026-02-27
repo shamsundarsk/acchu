@@ -1,15 +1,15 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import DemoSessionPage from './DemoSessionPage';
+import SessionPage from './SessionPage';
 
 /**
- * Wrapper component for demo purposes - bypasses WebSocket and API calls
+ * Wrapper component that loads the real SessionPage with all features
  */
 function SessionPageWrapper() {
   const { sessionId } = useParams<{ sessionId: string }>();
 
-  // Use demo version for now to bypass scanning phase
-  return <DemoSessionPage />;
+  // Use the real SessionPage with all delete buttons and features
+  return <SessionPage />;
 }
 
 export default SessionPageWrapper;

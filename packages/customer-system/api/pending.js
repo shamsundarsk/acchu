@@ -1,8 +1,26 @@
 // Serverless function for Vercel to handle /api/print-jobs/pending
 // This bypasses the TypeScript build issues
 
-// In-memory storage shared across function calls
-let printJobs = [];
+// Use shared job storage with better persistence
+const jobStorage = require('./simple-db');
+
+// Helper to parse JSON body
+async function parseBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch (err) {
+        reject(err);
+      }
+    });
+    req.on('error', reject);
+  });
+}
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -19,13 +37,30 @@ module.exports = async (req, res) => {
   // Handle POST - add new job
   if (req.method === 'POST') {
     try {
-      const { sessionId, files, printOptions, pricing, payment } = req.body;
+      // Parse request body
+      const body = await parseBody(req);
+      const { sessionId, file, printOptions, pricing, payment } = body;
+
+      console.log('=== CREATE JOB REQUEST ===');
+      console.log('SessionId:', sessionId);
+      console.log('File:', file?.originalName);
+      console.log('Print Options:', printOptions);
+
+      // Create unique job ID
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       const job = {
-        id: `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: jobId,
         sessionId,
-        fileName: files && files.length > 0 ? files[0].originalName : 'document.pdf',
-        fileUrl: null,
+        fileName: file?.originalName || 'document.pdf',
+        fileId: file?.id || jobId,
+        filePath: file?.serverPath || null, // ACTUAL FILE PATH on server
+        fileMetadata: {
+          originalName: file?.originalName || 'document.pdf',
+          mimeType: file?.mimeType || 'application/pdf',
+          size: file?.size || 0,
+          pageCount: file?.pageCount || 1
+        },
         printOptions: {
           copies: printOptions?.copies || 1,
           colorMode: printOptions?.colorMode || 'bw',
@@ -41,14 +76,16 @@ module.exports = async (req, res) => {
         timestamp: new Date().toISOString()
       };
 
-      printJobs.push(job);
-
-      // Keep only last 50 jobs
-      if (printJobs.length > 50) {
-        printJobs = printJobs.slice(-50);
-      }
-
-      console.log('Print job created:', job.id);
+      jobStorage.addJob(job);
+      
+      // Force immediate sync
+      jobStorage.forceSync();
+      
+      // Verify job was added
+      const allJobs = jobStorage.getAllJobs();
+      console.log(`✓ Job created: ${job.id}`);
+      console.log(`✓ Total jobs in storage: ${allJobs.length}`);
+      console.log(`✓ File path: ${job.filePath}`);
 
       res.status(201).json({
         success: true,
@@ -59,6 +96,7 @@ module.exports = async (req, res) => {
       });
       return;
     } catch (error) {
+      console.error('CREATE JOB ERROR:', error);
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to create print job'
@@ -70,15 +108,26 @@ module.exports = async (req, res) => {
   // Handle GET - return pending jobs
   if (req.method === 'GET') {
     try {
+      const pendingJobs = jobStorage.getPendingJobs();
+      const allJobs = jobStorage.getAllJobs();
+      
+      console.log('=== GET JOBS REQUEST ===');
+      console.log(`Total jobs: ${allJobs.length}`);
+      console.log(`Pending jobs: ${pendingJobs.length}`);
+      if (pendingJobs.length > 0) {
+        console.log('Jobs:', pendingJobs.map(j => `${j.id} - ${j.fileName}`).join(', '));
+      }
+      
       // Return all pending jobs
       const response = {
         success: true,
-        jobs: printJobs.filter(job => job.status === 'pending'),
+        jobs: pendingJobs,
         message: 'Pending jobs retrieved'
       };
 
       res.status(200).json(response);
     } catch (error) {
+      console.error('GET JOBS ERROR:', error);
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get pending jobs'

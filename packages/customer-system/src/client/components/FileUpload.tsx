@@ -133,6 +133,11 @@ export default function FileUpload({
   }, [selectedFiles, maxFiles, maxFileSize, onError]);
 
   const uploadFiles = async (filesToUpload: FileWithOptions[]) => {
+    if (!sessionId) {
+      onError('Session ID is missing. Please refresh the page.');
+      return;
+    }
+    
     setIsUploading(true);
     const uploadedMetadata: FileMetadata[] = [];
 
@@ -147,44 +152,71 @@ export default function FileUpload({
           )
         );
 
-        // Mock upload for demo - no API calls
-        await new Promise<void>((resolve) => {
-          // Simulate upload progress
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += 20;
+        // REAL FILE UPLOAD - Create FormData
+        const formData = new FormData();
+        formData.append('file', fileWithOptions.file);
+        formData.append('sessionId', sessionId);
+        formData.append('fileId', fileWithOptions.id);
+
+        // Upload to backend
+        const xhr = new XMLHttpRequest();
+        
+        // Track upload progress
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const progress = Math.round((e.loaded / e.total) * 100);
             setSelectedFiles(prev => 
               prev.map(f => 
                 f.id === fileWithOptions.id ? { ...f, progress } : f
               )
             );
-            
-            if (progress >= 100) {
-              clearInterval(interval);
-              
-              // Create mock metadata
-              const metadata: FileMetadata = {
-                id: fileWithOptions.id,
-                originalName: fileWithOptions.file.name,
-                mimeType: fileWithOptions.file.type,
-                size: fileWithOptions.file.size,
-                uploadedAt: new Date(),
-                localPath: `/tmp/sessions/${sessionId}/${fileWithOptions.file.name}`,
-                pageCount: fileWithOptions.file.type === 'application/pdf' ? Math.floor(Math.random() * 10) + 1 : 1
-              };
-              
-              setSelectedFiles(prev => 
-                prev.map(f => 
-                  f.id === fileWithOptions.id 
-                    ? { ...f, status: 'completed', progress: 100, metadata }
-                    : f
-                )
-              );
-              uploadedMetadata.push(metadata);
-              resolve();
-            }
-          }, 200);
+          }
         });
+
+        // Handle upload completion
+        const uploadPromise = new Promise<FileMetadata>((resolve, reject) => {
+          xhr.addEventListener('load', () => {
+            if (xhr.status === 200 || xhr.status === 201) {
+              try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success && response.data) {
+                  resolve(response.data);
+                } else {
+                  reject(new Error(response.error || 'Upload failed'));
+                }
+              } catch (err) {
+                reject(new Error('Invalid response from server'));
+              }
+            } else {
+              reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+          });
+
+          xhr.addEventListener('error', () => {
+            reject(new Error('Network error during upload'));
+          });
+
+          xhr.addEventListener('abort', () => {
+            reject(new Error('Upload aborted'));
+          });
+        });
+
+        // Send the request
+        xhr.open('POST', 'https://backend-server-iota-sand.vercel.app/api/upload-file');
+        xhr.send(formData);
+
+        // Wait for upload to complete
+        const metadata = await uploadPromise;
+        
+        setSelectedFiles(prev => 
+          prev.map(f => 
+            f.id === fileWithOptions.id 
+              ? { ...f, status: 'completed', progress: 100, metadata }
+              : f
+          )
+        );
+        
+        uploadedMetadata.push(metadata);
 
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Upload failed';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from './types/shared-types';
+import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from '../types/shared-types';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import FileUpload from '../components/FileUpload';
 import PrintOptionsComponent from '../components/PrintOptions';

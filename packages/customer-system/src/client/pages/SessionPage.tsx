@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from '../types';
+import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from '../types/shared-types';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import FileUpload from '../components/FileUpload';
 import PrintOptionsComponent from '../components/PrintOptions';
@@ -24,22 +24,13 @@ function SessionPage() {
   } = useWebSocketContext();
   
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
-  const [loading, setLoading] = useState(false); // Changed to false - no need to load anything
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<FileMetadata[]>([]);
   const [printOptions, setPrintOptions] = useState<PrintOptions | null>(null);
   const [pricing, setPricing] = useState<PriceBreakdown | null>(null);
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('upload');
-  
-  // Debug logging
-  useEffect(() => {
-    console.log('Current step:', currentStep);
-    console.log('Uploaded files:', uploadedFiles.length);
-    console.log('Print options:', printOptions);
-    console.log('Pricing:', pricing);
-    console.log('Payment request:', paymentRequest);
-  }, [currentStep, uploadedFiles, printOptions, pricing, paymentRequest]);
   const [printProgress, setPrintProgress] = useState<{
     status: JobStatus;
     progress?: number;
@@ -54,55 +45,9 @@ function SessionPage() {
       return;
     }
 
-    // For demo purposes, if sessionId contains 'demo', skip to print step
-    if (sessionId.includes('demo')) {
-      setUploadedFiles([
-        {
-          id: 'demo-file-1',
-          originalName: 'test-document.pdf',
-          mimeType: 'application/pdf',
-          size: 1024000,
-          uploadedAt: new Date(),
-          localPath: '/tmp/demo-file.pdf',
-          pageCount: 5
-        }
-      ]);
-      setPrintOptions({
-        copies: 2,
-        isColor: true,
-        isDuplex: false,
-        quality: 'high'
-      });
-      setPricing({
-        basePrice: 500,
-        colorSurcharge: 200,
-        duplexDiscount: 0,
-        totalPages: 10,
-        totalAmount: 1400
-      });
-      setCurrentStep('print');
-      setLoading(false);
-      return;
-    }
-
-    fetchSessionInfo();
+    // Skip fetching session info - work with client-side state only
+    setLoading(false);
   }, [sessionId]);
-
-  // Connect to WebSocket for real-time updates
-  useEffect(() => {
-    if (sessionId && isConnected) {
-      // Send join session message to get updates for this session
-      const joinMessage = {
-        type: 'join-session',
-        sessionId: sessionId
-      };
-      
-      // Send via WebSocket if available
-      if (window.WebSocket) {
-        console.log('Joining session for WebSocket updates:', sessionId);
-      }
-    }
-  }, [sessionId, isConnected]);
 
   // Handle WebSocket session status updates
   useEffect(() => {
@@ -170,10 +115,27 @@ function SessionPage() {
 
   const fetchSessionInfo = async () => {
     try {
-      // Skip API call for demo - just set loading to false
-      setLoading(false);
+      const BACKEND_URL = 'https://backend-server-iota-sand.vercel.app';
+      const response = await fetch(`${BACKEND_URL}/api/sessions/${sessionId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setSessionInfo(data.data);
+        if (data.data.session.files) {
+          setUploadedFiles(data.data.session.files);
+          if (data.data.session.files.length > 0) {
+            setCurrentStep('config');
+          }
+        }
+        if (data.data.session.paymentStatus === PaymentStatus.COMPLETED) {
+          setCurrentStep('print');
+        }
+      } else {
+        setError(data.error || 'Failed to load session');
+      }
     } catch (err) {
       setError('Network error occurred');
+    } finally {
       setLoading(false);
     }
   };
@@ -190,63 +152,85 @@ function SessionPage() {
     setPricing(newPricing);
   };
 
-  const handlePaymentComplete = async (payment: PaymentRequest) => {
+  const handlePaymentComplete = (payment: PaymentRequest) => {
     setPaymentRequest(payment);
     setCurrentStep('print');
-    
-    // Automatically send print job to shopkeeper's queue after payment confirmation
-    await sendPrintJobToQueue(payment);
-  };
-
-  const sendPrintJobToQueue = async (payment: PaymentRequest) => {
-    try {
-      setPrintProgress({
-        status: JobStatus.QUEUED,
-        message: 'Sending to shopkeeper...'
-      });
-
-      // Send job to backend
-      const response = await fetch('/api/print-jobs/pending', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          files: uploadedFiles,
-          printOptions,
-          pricing,
-          payment
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create print job');
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        setPrintProgress({
-          status: JobStatus.QUEUED,
-          message: 'Print job sent to shopkeeper queue successfully!'
-        });
-      } else {
-        throw new Error(result.error || 'Failed to create print job');
-      }
-
-    } catch (error) {
-      console.error('Error sending print job to queue:', error);
-      setPrintProgress({
-        status: JobStatus.FAILED,
-        error: 'Failed to send print job to queue. Please try again.'
-      });
-    }
   };
 
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
     setTimeout(() => setError(null), 5000);
+  };
+
+  const handleStartPrint = async () => {
+    if (!sessionId || !paymentRequest || !printOptions) {
+      handleError('Missing required information for print job');
+      return;
+    }
+
+    try {
+      setPrintProgress({
+        status: JobStatus.PRINTING,
+        progress: 0,
+        message: 'Starting print job...'
+      });
+
+      // Submit print job to the backend
+      const BACKEND_URL = 'https://backend-server-iota-sand.vercel.app';
+      const response = await fetch(`${BACKEND_URL}/api/print-jobs/${sessionId}/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          printOptions,
+          transactionId: paymentRequest.transactionId,
+          files: uploadedFiles.map(file => ({
+            id: file.id,
+            name: file.originalName,
+            size: file.size,
+            pageCount: file.pageCount || 1
+          }))
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setPrintProgress({
+          status: JobStatus.PRINTING,
+          progress: 50,
+          message: 'Print job submitted successfully'
+        });
+
+        // Simulate print completion for demo
+        setTimeout(() => {
+          setPrintProgress({
+            status: JobStatus.COMPLETED,
+            progress: 100,
+            message: 'Print job completed successfully!'
+          });
+        }, 3000);
+      } else {
+        throw new Error(result.error || 'Failed to submit print job');
+      }
+    } catch (error) {
+      console.error('Print job error:', error);
+      setPrintProgress({
+        status: JobStatus.FAILED,
+        error: error instanceof Error ? error.message : 'Failed to submit print job. Please try again.'
+      });
+    }
+  };
+
+  const handleDeleteFile = (fileId: string) => {
+    if (confirm('Are you sure you want to delete this file?')) {
+      setUploadedFiles(prevFiles => prevFiles.filter(f => f.id !== fileId));
+    }
+  };
+
+  const handleAddMoreFiles = () => {
+    setCurrentStep('upload');
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -275,8 +259,6 @@ function SessionPage() {
       </div>
     );
   }
-
-  // For demo, always show as valid session
 
   return (
     <div className="mobile-app">
@@ -330,17 +312,56 @@ function SessionPage() {
 
             {uploadedFiles.length > 0 && (
               <div className="pending-queue">
-                <div className="section-label">PENDING QUEUE</div>
+                <div className="section-label">PENDING QUEUE ({uploadedFiles.length} files)</div>
                 {uploadedFiles.map((file, index) => (
-                  <div key={file.id} className="file-item">
-                    <div className="file-info">
+                  <div key={file.id} className="file-item" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    padding: '16px',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '12px',
+                    marginBottom: '12px',
+                    background: 'white'
+                  }}>
+                    <div className="file-info" style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div className="file-icon">📄</div>
                       <div className="file-details">
                         <div className="file-name">{file.originalName}</div>
-                        <div className="file-meta">{formatFileSize(file.size)} • Ready</div>
+                        <div className="file-meta">{formatFileSize(file.size)} • {file.pageCount || 1} pages</div>
                       </div>
                     </div>
-                    <button className="remove-file">×</button>
+                    <button 
+                      className="remove-file"
+                      onClick={() => handleDeleteFile(file.id)}
+                      title="Delete file"
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        border: 'none',
+                        background: '#ff4444',
+                        borderRadius: '8px',
+                        color: 'white',
+                        fontSize: '22px',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#cc0000';
+                        e.currentTarget.style.transform = 'scale(1.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#ff4444';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 ))}
                 
@@ -363,8 +384,100 @@ function SessionPage() {
             <h1 className="step-title">PRINT CONFIG</h1>
             <p className="step-subtitle">
               Configure your print settings and<br />
-              review before payment.
+              review before proceeding.
             </p>
+
+            {/* Show uploaded files list */}
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '16px',
+              margin: '20px 0',
+              border: '1px solid #e5e7eb'
+            }}>
+              <div className="section-label">UPLOADED FILES ({uploadedFiles.length})</div>
+              {uploadedFiles.map((file) => (
+                <div key={file.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px',
+                  background: '#f9fafb',
+                  borderRadius: '8px',
+                  marginBottom: '8px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    flex: 1,
+                    minWidth: 0
+                  }}>
+                    <span style={{ fontSize: '18px' }}>📄</span>
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#1f2937',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>{file.originalName}</span>
+                    <span style={{
+                      fontSize: '12px',
+                      color: '#6b7280',
+                      background: '#e5e7eb',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontWeight: 600
+                    }}>{file.pageCount || 1}p</span>
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteFile(file.id)}
+                    title="Delete"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: 'none',
+                      background: '#ff4444',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '20px',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#cc0000';
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#ff4444';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+              <button onClick={handleAddMoreFiles} style={{
+                width: '100%',
+                padding: '12px',
+                background: 'white',
+                color: '#1a1a1a',
+                border: '2px dashed #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginTop: '8px'
+              }}>
+                + Add More Files
+              </button>
+            </div>
 
             <PrintOptionsComponent
               files={uploadedFiles}
@@ -372,116 +485,204 @@ function SessionPage() {
               onError={handleError}
             />
 
-            {pricing && printOptions && (
-              <>
-                <div className="pricing-summary">
-                  <div className="price-row">
-                    <span>Pages:</span>
-                    <span>{pricing.totalPages}</span>
-                  </div>
-                  <div className="price-row">
-                    <span>Copies:</span>
-                    <span>{printOptions.copies || 1}</span>
-                  </div>
-                  <div className="price-row total">
-                    <span>Total:</span>
-                    <span>₹{((pricing.totalAmount || 0) / 100).toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <PaymentInterface
-                  sessionId={sessionId!}
-                  pricing={pricing}
-                  onPaymentComplete={handlePaymentComplete}
-                  onError={handleError}
-                  enabled={true}
-                />
-              </>
-            )}
+            <button className="continue-btn" onClick={() => setCurrentStep('print')}>
+              PROCEED TO PRINT →
+            </button>
           </div>
         )}
 
         {currentStep === 'print' && (
           <div className="print-step">
-            <h1 className="step-title">PRINT JOB<br />QUEUED</h1>
+            <h1 className="step-title">PRINT JOB<br />CONFIRMED</h1>
 
-            <div className="queue-status-frame">
-              <div className="queue-container">
-                <div className="queue-icon">
-                  <div className="printer-icon">🖨️</div>
-                  <div className="queue-indicator">
-                    <div className="queue-dots">
-                      <div className="dot active"></div>
-                      <div className="dot active"></div>
-                      <div className="dot"></div>
+            <div className="qr-frame">
+              <div className="qr-container">
+                <div className="qr-placeholder">
+                  <div className="qr-code">
+                    {/* QR Code for kiosk scanning */}
+                    <div className="qr-pattern">
+                      <div className="qr-squares">
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                        <div className="qr-square"></div>
+                      </div>
                     </div>
                   </div>
+                  <div className="qr-label">PRINT JOB</div>
                 </div>
-                <div className="queue-label">IN QUEUE</div>
               </div>
             </div>
 
-            <div className="queue-instruction">
-              <div className="status-icon">✅</div>
-              <div className="status-text">SENT TO SHOPKEEPER</div>
-              <p className="status-subtitle">
-                Your print job has been sent to the<br />
-                shopkeeper's queue. They will print it shortly.
+            <div className="scan-instruction">
+              <div className="scan-icon">📱</div>
+              <div className="scan-text">READY TO SCAN</div>
+              <p className="scan-subtitle">
+                Present this code at the kiosk<br />
+                scanner to release your document.
               </p>
             </div>
 
-            {printProgress && (
-              <div className="print-progress">
-                <div className="progress-header">
-                  <span className="progress-label">Status:</span>
-                  <span className={`progress-status ${printProgress.status.toLowerCase()}`}>
-                    {printProgress.status}
-                  </span>
-                </div>
-                
-                {printProgress.progress !== undefined && (
-                  <div className="progress-bar">
-                    <div 
-                      className="progress-fill" 
-                      style={{ width: `${printProgress.progress}%` }}
-                    ></div>
+            {/* FILES LIST WITH DELETE OPTION */}
+            <div style={{
+              background: '#f9fafb',
+              borderRadius: '12px',
+              padding: '16px',
+              margin: '20px 0'
+            }}>
+              <div style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: '#6b7280',
+                letterSpacing: '0.05em',
+                marginBottom: '12px'
+              }}>FILES ({uploadedFiles.length})</div>
+              {uploadedFiles.map((file) => (
+                <div key={file.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '10px',
+                  background: 'white',
+                  borderRadius: '8px',
+                  marginBottom: '8px',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    flex: 1,
+                    minWidth: 0
+                  }}>
+                    <span style={{ fontSize: '18px' }}>📄</span>
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#1f2937',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>{file.originalName}</span>
                   </div>
-                )}
-                
-                {printProgress.message && (
-                  <div className="progress-message">{printProgress.message}</div>
-                )}
-                
-                {printProgress.error && (
-                  <div className="progress-error">{printProgress.error}</div>
-                )}
-              </div>
-            )}
+                  <button 
+                    onClick={() => {
+                      if (confirm('Delete this file? This will cancel the print job and you\'ll need to start over.')) {
+                        handleDeleteFile(file.id);
+                        setCurrentStep('upload');
+                      }
+                    }}
+                    title="Delete file"
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      border: 'none',
+                      background: '#ff4444',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
 
-            {/* Customer Information Display */}
-            <div className="customer-info-section">
-              <div className="customer-header">
-                <div className="customer-icon">👤</div>
-                <div className="customer-name">Aneesh Nikam</div>
+            {/* EDIT AND CANCEL BUTTONS */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              margin: '20px 0'
+            }}>
+              <button 
+                onClick={() => {
+                  if (confirm('Go back to edit print settings?')) {
+                    setCurrentStep('config');
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                ✏️ Edit Settings
+              </button>
+              <button 
+                onClick={() => {
+                  if (confirm('Cancel this print job? You\'ll return to the upload step.')) {
+                    setUploadedFiles([]);
+                    setPrintOptions(null);
+                    setPricing(null);
+                    setPaymentRequest(null);
+                    setCurrentStep('upload');
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                ❌ Cancel Job
+              </button>
+            </div>
+
+            {/* GPay UPI QR Code Section */}
+            <div className="upi-payment-section">
+              <div className="upi-header">
+                <div className="upi-icon">📎</div>
+                <div className="upi-name">Aneesh Nikam</div>
               </div>
               
-              <div className="order-summary">
-                <div className="summary-row">
-                  <span>Files:</span>
-                  <span>{uploadedFiles.length}</span>
+              <div className="upi-qr-container">
+                <div className="upi-qr-code">
+                  {/* GPay UPI QR Code Pattern */}
+                  <div className="upi-qr-pattern">
+                    <div className="upi-qr-squares">
+                      {Array.from({ length: 25 }, (_, i) => (
+                        <div key={i} className="upi-qr-square"></div>
+                      ))}
+                    </div>
+                    <div className="gpay-logo">
+                      <div className="gpay-icon">💳</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="summary-row">
-                  <span>Pages:</span>
-                  <span>{pricing?.totalPages || 0}</span>
-                </div>
-                <div className="summary-row">
-                  <span>Copies:</span>
-                  <span>{printOptions?.copies || 1}</span>
-                </div>
-                <div className="summary-row total">
-                  <span>Total Paid:</span>
-                  <span>₹{((pricing?.totalAmount || 0) / 100).toFixed(2)}</span>
-                </div>
+                
+                <div className="upi-id">UPI ID: aneeshnikam014@okaxis</div>
+                <div className="upi-instruction">Scan to pay with any UPI app</div>
               </div>
             </div>
           </div>

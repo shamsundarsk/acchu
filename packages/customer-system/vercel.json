@@ -1,16 +1,42 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "npm install && npm run build:client",
+  "buildCommand": "echo 'Using pre-built files v2'",
   "outputDirectory": "dist/client",
+  "functions": {
+    "api/upload-file.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
   "routes": [
     {
       "src": "/api/sessions",
       "dest": "/api/sessions.js"
     },
     {
+      "src": "/api/test-job",
+      "dest": "/api/test-job.js"
+    },
+    {
+      "src": "/api/upload-file",
+      "dest": "/api/upload-file.js"
+    },
+    {
+      "src": "/api/download-file",
+      "dest": "/api/download-file.js"
+    },
+    {
+      "src": "/api/delete-files",
+      "dest": "/api/delete-files.js"
+    },
+    {
       "src": "/api/print-jobs/pending",
       "dest": "/api/pending.js"
+    },
+    {
+      "src": "/api/print-jobs/([^/]+)/cancel",
+      "dest": "/api/cancel-job.js"
     },
     {
       "src": "/session/(.*)",
