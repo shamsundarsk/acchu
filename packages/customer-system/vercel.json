@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "echo 'Using pre-built files v2'",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
   "functions": {
     "api/upload-file.js": {
