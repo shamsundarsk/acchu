@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PaymentStatus, PaymentRequest, UPIRequest, PriceBreakdown, ApiResponse } from '@sps/shared-types';
+import { PaymentStatus, PaymentRequest, UPIRequest, PriceBreakdown, ApiResponse } from '../types';
 
 interface PaymentInterfaceProps {
   sessionId: string;
@@ -28,6 +28,11 @@ export default function PaymentInterface({
   onError,
   enabled 
 }: PaymentInterfaceProps) {
+  // Safety check - don't render if pricing is null or invalid
+  if (!pricing || !pricing.totalAmount || pricing.totalAmount <= 0) {
+    return null;
+  }
+  
   const [paymentState, setPaymentState] = useState<PaymentState>({
     status: PaymentStatus.PENDING,
     retryCount: 0
@@ -38,7 +43,7 @@ export default function PaymentInterface({
 
   // Initialize payment request
   const initializePayment = useCallback(async () => {
-    if (!enabled || pricing.totalAmount <= 0) {
+    if (!enabled || !pricing || pricing.totalAmount <= 0) {
       return;
     }
 

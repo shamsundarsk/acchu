@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PrintOptions as PrintOptionsType, PriceBreakdown, FileMetadata, ApiResponse, PriceQuote } from '@sps/shared-types';
+import { PrintOptions as PrintOptionsType, PriceBreakdown, FileMetadata, ApiResponse, PriceQuote } from './types/shared-types';
 
 interface PrintOptionsProps {
   files: FileMetadata[];

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useState } from 'react';
 import { useWebSocket, WebSocketMessage, WebSocketHookReturn } from '../hooks/useWebSocket';
-import { SessionStatus, JobStatus } from '@sps/shared-types';
+import { SessionStatus, JobStatus } from './types/shared-types';
 
 export interface SessionStatusUpdate {
   status: SessionStatus;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from '@sps/shared-types';
+import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from './types/shared-types';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import FileUpload from '../components/FileUpload';
 import PrintOptionsComponent from '../components/PrintOptions';
@@ -220,6 +220,16 @@ function SessionPage() {
     }
   };
 
+  const handleDeleteFile = (fileId: string) => {
+    if (confirm('Are you sure you want to delete this file?')) {
+      setUploadedFiles(prevFiles => prevFiles.filter(f => f.id !== fileId));
+    }
+  };
+
+  const handleAddMoreFiles = () => {
+    setCurrentStep('upload');
+  };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -310,17 +320,56 @@ function SessionPage() {
 
             {uploadedFiles.length > 0 && (
               <div className="pending-queue">
-                <div className="section-label">PENDING QUEUE</div>
+                <div className="section-label">PENDING QUEUE ({uploadedFiles.length} files)</div>
                 {uploadedFiles.map((file, index) => (
-                  <div key={file.id} className="file-item">
-                    <div className="file-info">
+                  <div key={file.id} className="file-item" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    padding: '16px',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '12px',
+                    marginBottom: '12px',
+                    background: 'white'
+                  }}>
+                    <div className="file-info" style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div className="file-icon">📄</div>
                       <div className="file-details">
                         <div className="file-name">{file.originalName}</div>
-                        <div className="file-meta">{formatFileSize(file.size)} • Ready</div>
+                        <div className="file-meta">{formatFileSize(file.size)} • {file.pageCount || 1} pages</div>
                       </div>
                     </div>
-                    <button className="remove-file">×</button>
+                    <button 
+                      className="remove-file"
+                      onClick={() => handleDeleteFile(file.id)}
+                      title="Delete file"
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        border: 'none',
+                        background: '#ff4444',
+                        borderRadius: '8px',
+                        color: 'white',
+                        fontSize: '22px',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#cc0000';
+                        e.currentTarget.style.transform = 'scale(1.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#ff4444';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 ))}
                 
@@ -345,6 +394,98 @@ function SessionPage() {
               Configure your print settings and<br />
               review before proceeding.
             </p>
+
+            {/* Show uploaded files list */}
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '16px',
+              margin: '20px 0',
+              border: '1px solid #e5e7eb'
+            }}>
+              <div className="section-label">UPLOADED FILES ({uploadedFiles.length})</div>
+              {uploadedFiles.map((file) => (
+                <div key={file.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px',
+                  background: '#f9fafb',
+                  borderRadius: '8px',
+                  marginBottom: '8px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    flex: 1,
+                    minWidth: 0
+                  }}>
+                    <span style={{ fontSize: '18px' }}>📄</span>
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#1f2937',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>{file.originalName}</span>
+                    <span style={{
+                      fontSize: '12px',
+                      color: '#6b7280',
+                      background: '#e5e7eb',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontWeight: 600
+                    }}>{file.pageCount || 1}p</span>
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteFile(file.id)}
+                    title="Delete"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: 'none',
+                      background: '#ff4444',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '20px',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#cc0000';
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#ff4444';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+              <button onClick={handleAddMoreFiles} style={{
+                width: '100%',
+                padding: '12px',
+                background: 'white',
+                color: '#1a1a1a',
+                border: '2px dashed #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginTop: '8px'
+              }}>
+                + Add More Files
+              </button>
+            </div>
 
             <PrintOptionsComponent
               files={uploadedFiles}
@@ -393,6 +534,137 @@ function SessionPage() {
                 Present this code at the kiosk<br />
                 scanner to release your document.
               </p>
+            </div>
+
+            {/* FILES LIST WITH DELETE OPTION */}
+            <div style={{
+              background: '#f9fafb',
+              borderRadius: '12px',
+              padding: '16px',
+              margin: '20px 0'
+            }}>
+              <div style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: '#6b7280',
+                letterSpacing: '0.05em',
+                marginBottom: '12px'
+              }}>FILES ({uploadedFiles.length})</div>
+              {uploadedFiles.map((file) => (
+                <div key={file.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '10px',
+                  background: 'white',
+                  borderRadius: '8px',
+                  marginBottom: '8px',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    flex: 1,
+                    minWidth: 0
+                  }}>
+                    <span style={{ fontSize: '18px' }}>📄</span>
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#1f2937',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>{file.originalName}</span>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (confirm('Delete this file? This will cancel the print job and you\'ll need to start over.')) {
+                        handleDeleteFile(file.id);
+                        setCurrentStep('upload');
+                      }
+                    }}
+                    title="Delete file"
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      border: 'none',
+                      background: '#ff4444',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* EDIT AND CANCEL BUTTONS */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              margin: '20px 0'
+            }}>
+              <button 
+                onClick={() => {
+                  if (confirm('Go back to edit print settings?')) {
+                    setCurrentStep('config');
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                ✏️ Edit Settings
+              </button>
+              <button 
+                onClick={() => {
+                  if (confirm('Cancel this print job? You\'ll return to the upload step.')) {
+                    setUploadedFiles([]);
+                    setPrintOptions(null);
+                    setPricing(null);
+                    setPaymentRequest(null);
+                    setCurrentStep('upload');
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                ❌ Cancel Job
+              </button>
             </div>
 
             {/* GPay UPI QR Code Section */}

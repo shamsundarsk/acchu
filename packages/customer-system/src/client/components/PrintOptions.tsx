@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PrintOptions as PrintOptionsType, PriceBreakdown, FileMetadata, ApiResponse, PriceQuote } from '@sps/shared-types';
+import { PrintOptions as PrintOptionsType, PriceBreakdown, FileMetadata, ApiResponse } from '../types';
+
+interface PriceQuote {
+  totalAmount: number;
+  breakdown: PriceBreakdown;
+}
 
 interface PrintOptionsProps {
   files: FileMetadata[];
@@ -98,7 +103,7 @@ export default function PrintOptions({
     const newPricing = calculateLocalPricing();
     setPricing(newPricing);
     onOptionsChange(options, newPricing);
-  }, [files, options, calculateLocalPricing, onOptionsChange]);
+  }, [files.length, options.copies, options.colorMode, options.duplex, options.paperSize]); // Fixed dependencies
 
   const handleCopiesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const copies = parseInt(e.target.value);

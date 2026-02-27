@@ -37,8 +37,8 @@ function RedirectToSession() {
       }
 
       const data = await response.json();
-      const sessionId = data.sessionId;
-      const token = data.token; // WebSocket security token
+      const sessionId = data.data?.sessionId || data.sessionId;
+      const token = data.data?.token || data.token; // WebSocket security token
 
       // Store token in sessionStorage for WebSocket authentication
       if (token) {

@@ -51,9 +51,9 @@ export class RazorpayService {
       
       return {
         id: order.id,
-        amount: order.amount,
+        amount: typeof order.amount === 'number' ? order.amount : parseInt(order.amount as string, 10),
         currency: order.currency,
-        receipt: order.receipt,
+        receipt: order.receipt || receipt,
         status: order.status
       };
     } catch (error) {

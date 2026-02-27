@@ -8,6 +8,7 @@ export interface SessionRequest extends Request {
     token: string;
     shopId: string;
     isValid: boolean;
+    printJobs?: any[]; // Array to store print jobs for this session
   };
 }
 

@@ -19,7 +19,7 @@ import type {
   UploadResult,
   PriceQuote,
   WebSocketEvent
-} from '@sps/shared-types';
+} from './shared-types';
 
 // Import enums and classes as values
 import { 
@@ -30,7 +30,7 @@ import {
   AuditEventType,
   SessionValidator, 
   SessionSerializer 
-} from '@sps/shared-types';
+} from './shared-types';
 
 // Re-export all imported types
 export type {

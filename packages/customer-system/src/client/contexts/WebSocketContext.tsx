@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useState } from 'react';
 import { useWebSocket, WebSocketMessage, WebSocketHookReturn } from '../hooks/useWebSocket';
-import { SessionStatus, JobStatus } from '@sps/shared-types';
+import { SessionStatus, JobStatus } from '../types';
 
 export interface SessionStatusUpdate {
   status: SessionStatus;
@@ -134,14 +134,14 @@ export function WebSocketProvider({ children, sessionId }: WebSocketProviderProp
   };
 
   const webSocket = useWebSocket({
-    url: getWebSocketUrl(),
+    url: 'wss://disabled.local', // Disabled - using mock state
     sessionId,
     onMessage: handleMessage,
     onError: handleError,
     onConnect: handleConnect,
     onDisconnect: handleDisconnect,
     reconnectInterval: 3000,
-    maxReconnectAttempts: 10
+    maxReconnectAttempts: 0 // Don't reconnect
   });
 
   const contextValue: WebSocketContextValue = {

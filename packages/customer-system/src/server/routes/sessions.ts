@@ -22,8 +22,10 @@ router.post('/', async (req, res) => {
     
     const response: ApiResponse = {
       success: true,
-      sessionId,
-      token, // Return token for WebSocket authentication
+      data: {
+        sessionId,
+        token, // Return token for WebSocket authentication
+      },
       message: 'Session created successfully',
     };
 

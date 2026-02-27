@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PriceBreakdown, ApiResponse } from '@sps/shared-types';
+import { PriceBreakdown, ApiResponse } from './types/shared-types';
 import './PaymentInterface.css';
 
 interface PaymentInterfaceProps {

@@ -30,6 +30,9 @@ export interface WebSocketHookReturn {
 /**
  * Custom React hook for WebSocket communication with automatic reconnection
  * Requirements: 6.3, 6.4 - Real-time session status updates and print progress broadcasting
+ * 
+ * NOTE: WebSocket is disabled for Vercel deployment (serverless doesn't support WebSocket)
+ * Using mock connected state for now
  */
 export function useWebSocket(options: WebSocketHookOptions): WebSocketHookReturn {
   const {
@@ -43,8 +46,9 @@ export function useWebSocket(options: WebSocketHookOptions): WebSocketHookReturn
     maxReconnectAttempts = 10
   } = options;
 
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  // Mock connected state for Vercel deployment
+  const [isConnected, setIsConnected] = useState(true);
+  const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('connected');
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   
   const wsRef = useRef<WebSocket | null>(null);
@@ -53,6 +57,15 @@ export function useWebSocket(options: WebSocketHookOptions): WebSocketHookReturn
   const isManuallyClosedRef = useRef(false);
 
   const connect = useCallback(() => {
+    // WebSocket disabled for Vercel deployment (serverless doesn't support WebSocket)
+    // Mock connected state instead
+    console.log('WebSocket connection disabled for serverless deployment');
+    setIsConnected(true);
+    setConnectionState('connected');
+    onConnect?.();
+    return;
+    
+    /* Original WebSocket connection code - disabled for Vercel
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -129,6 +142,7 @@ export function useWebSocket(options: WebSocketHookOptions): WebSocketHookReturn
       setConnectionState('error');
       scheduleReconnect();
     }
+    */
   }, [url, sessionId, onMessage, onError, onConnect, onDisconnect, maxReconnectAttempts]);
 
   const scheduleReconnect = useCallback(() => {

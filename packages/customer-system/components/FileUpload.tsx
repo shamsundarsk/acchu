@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { FileMetadata, UploadResult, ApiResponse, PrintOptions } from '@sps/shared-types';
+import { FileMetadata, UploadResult, ApiResponse, PrintOptions } from './types/shared-types';
 
 interface FileUploadProps {
   sessionId: string;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from '@sps/shared-types';
+import { SessionInfo, FileMetadata, PrintOptions, PriceBreakdown, PaymentRequest, PaymentStatus, SessionStatus, JobStatus } from '../types';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import FileUpload from '../components/FileUpload';
 import PrintOptionsComponent from '../components/PrintOptions';
@@ -24,7 +24,7 @@ function SessionPage() {
   } = useWebSocketContext();
   
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false - no need to load anything
   const [error, setError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<FileMetadata[]>([]);
   const [printOptions, setPrintOptions] = useState<PrintOptions | null>(null);
@@ -202,27 +202,22 @@ function SessionPage() {
     try {
       setPrintProgress({
         status: JobStatus.QUEUED,
-        message: 'Sending print job to shopkeeper queue...'
+        message: 'Sending to shopkeeper...'
       });
 
-      // Use the correct AcchuSandboxEngine API instead of the customer system API
-      const formData = new FormData();
-      
-      // Add files (for demo, we'll create a simple text file)
-      const demoFile = new Blob(['Demo print job content'], { type: 'text/plain' });
-      formData.append('files', demoFile, 'demo-print-job.txt');
-      
-      // Add form fields
-      formData.append('sessionId', sessionId || 'demo-session');
-      formData.append('copies', printOptions?.copies?.toString() || '1');
-      formData.append('colorMode', printOptions?.isColor ? 'color' : 'bw');
-      formData.append('quality', printOptions?.quality || 'standard');
-      formData.append('pages', 'all');
-
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const response = await fetch(`${apiBaseUrl}/api/integration/customer/upload`, {
+      // Send job to backend
+      const response = await fetch('/api/print-jobs/pending', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          files: uploadedFiles,
+          printOptions,
+          pricing,
+          payment
+        })
       });
 
       if (!response.ok) {
@@ -230,7 +225,7 @@ function SessionPage() {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         setPrintProgress({
           status: JobStatus.QUEUED,
@@ -239,6 +234,7 @@ function SessionPage() {
       } else {
         throw new Error(result.error || 'Failed to create print job');
       }
+
     } catch (error) {
       console.error('Error sending print job to queue:', error);
       setPrintProgress({
@@ -376,30 +372,32 @@ function SessionPage() {
               onError={handleError}
             />
 
-            {pricing && (
-              <div className="pricing-summary">
-                <div className="price-row">
-                  <span>Pages:</span>
-                  <span>{pricing.totalPages}</span>
+            {pricing && printOptions && (
+              <>
+                <div className="pricing-summary">
+                  <div className="price-row">
+                    <span>Pages:</span>
+                    <span>{pricing.totalPages}</span>
+                  </div>
+                  <div className="price-row">
+                    <span>Copies:</span>
+                    <span>{printOptions.copies || 1}</span>
+                  </div>
+                  <div className="price-row total">
+                    <span>Total:</span>
+                    <span>₹{((pricing.totalAmount || 0) / 100).toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="price-row">
-                  <span>Copies:</span>
-                  <span>{printOptions?.copies || 1}</span>
-                </div>
-                <div className="price-row total">
-                  <span>Total:</span>
-                  <span>₹{((pricing.totalAmount || 0) / 100).toFixed(2)}</span>
-                </div>
-              </div>
-            )}
 
-            <PaymentInterface
-              sessionId={sessionId!}
-              pricing={pricing!}
-              onPaymentComplete={handlePaymentComplete}
-              onError={handleError}
-              enabled={uploadedFiles.length > 0}
-            />
+                <PaymentInterface
+                  sessionId={sessionId!}
+                  pricing={pricing}
+                  onPaymentComplete={handlePaymentComplete}
+                  onError={handleError}
+                  enabled={true}
+                />
+              </>
+            )}
           </div>
         )}
 

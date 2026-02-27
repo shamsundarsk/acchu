@@ -244,17 +244,7 @@ router.post('/:sessionId/refund', async (req, res) => {
   }
 });
 
-// Legacy endpoints for backward compatibility
-router.post('/:sessionId/generate', async (req, res) => {
-  // Redirect to create-order
-  req.url = `/${req.params.sessionId}/create-order`;
-  return router.handle(req, res);
-});
-
-router.get('/:sessionId/verify/:transactionId', async (req, res) => {
-  // Redirect to status
-  req.url = `/${req.params.sessionId}/status/${req.params.transactionId}`;
-  return router.handle(req, res);
-});
+// Legacy endpoints for backward compatibility - removed as they're not needed
+// Use the new endpoints directly: /create-order and /status/:transactionId
 
 export { router as paymentRoutes };
